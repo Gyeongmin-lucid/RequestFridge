@@ -1,36 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
-        <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
-    </group>
-
-    <item android:title="Communicate">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="내용물 정렬 방법">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title=""
+                android:id="@+id/nav_sort_spinner"
+                app:actionLayout="@layout/spinner"></item>
         </menu>
     </item>
-
+    <item android:title="유통기한 알림"
+        android:id="@+id/alarm_switch"
+        app:showAsAction="always"
+        android:actionViewClass="android.support.v7.widget.SwitchCompat"
+        app:actionLayout="@layout/menu_switch">
+        <menu>
+            <item
+                android:title=""
+                android:id="@+id/nav_alarm_spinner"
+                app:actionLayout="@layout/spinner"></item></menu>
+    </item>
+<item android:title="즐겨찾기 관리"
+android:id="@+id/book_mark"></item>
+<item android:title="로그인"
+        android:id="@+id/login"></item>
 </menu>
