@@ -1,7 +1,6 @@
 package com.example.kgm13.requestfridge;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;

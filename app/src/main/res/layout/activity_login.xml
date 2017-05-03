@@ -17,10 +17,19 @@
     <Button
         android:layout_width="200dp"
         android:layout_height="70dp"
-        android:text="비회원 로그인"
-        android:id="@+id/button2"
+        android:text="회원 가입"
+        android:id="@+id/buttton_signup"
         android:layout_below="@+id/button1"
         android:layout_alignLeft="@+id/button1"
         android:layout_alignStart="@+id/button1" />
+
+    <Button
+        android:layout_width="200dp"
+        android:layout_height="70dp"
+        android:text="비회원 로그인"
+        android:id="@+id/button2"
+        android:layout_below="@+id/buttton_signup"
+        android:layout_alignLeft="@+id/buttton_signup"
+        android:layout_alignStart="@+id/buttton_signup" />
 
 </RelativeLayout>
