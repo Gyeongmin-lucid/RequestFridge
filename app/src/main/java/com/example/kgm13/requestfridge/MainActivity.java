@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity
 
     //spinner 내부
     private String[] NavSortItem = { "유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
-    private String[] NavAlarmDateItem = {"1일", "2일","3일", "5일","7일"};
+    private String[] NavAlarmDateItem = {"1일", "2일","3일", "5일", "7일"};
     boolean f1 = true;
     boolean f2 = false;
 
@@ -95,13 +95,11 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onPageSelected(int position) {
                 if(position == 0){
-                    f1 = true;
-                    f2 = false;
+                    f1 = true; f2 = false;
                     fab.setVisibility(View.VISIBLE);
                 }
                 if(position == 1){
-                    f1 = false;
-                    f2 = true;
+                    f1 = false; f2 = true;
                     fab.setVisibility(View.VISIBLE);
                 }
                 if(position == 2){
@@ -111,9 +109,9 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                if(state == 2){
+                if(state == 2)
                     fab.setVisibility(View.GONE);
-                }
+
             }
         });
 

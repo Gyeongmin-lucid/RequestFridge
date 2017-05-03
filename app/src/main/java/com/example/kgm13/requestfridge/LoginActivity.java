@@ -2,7 +2,6 @@ package com.example.kgm13.requestfridge;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.UserManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -25,6 +24,7 @@ import com.kakao.util.helper.log.Logger;
 
 public class LoginActivity extends AppCompatActivity {
     public Button btn2;
+    public Button btnsignup;
     SessionCallback callback;
 
     @Override
@@ -43,11 +43,20 @@ public class LoginActivity extends AppCompatActivity {
         Session.getCurrentSession().addCallback(callback);
 
         btn2 = (Button)findViewById(R.id.button2);
+        btnsignup = (Button) findViewById(R.id.buttton_signup);
 
         btn2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnsignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(LoginActivity.this, Login_Sign_up.class);
                 startActivity(intent);
             }
         });
