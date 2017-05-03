@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    tools:context="com.example.kgm13.requestfridge.Login_Sign_up">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"
+            android:text="ID : "
+            android:gravity="center"
+            />
+        <EditText
+            android:id="@+id/signup_id"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"
+            android:text="PW : "
+            android:gravity="center"
+            />
+        <EditText
+            android:id="@+id/signup_pw"
+            android:layout_width="200dp"
+            android:inputType="textPassword"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"
+            android:text="PW check : "
+            android:gravity="center"
+            />
+        <EditText
+            android:id="@+id/signup_pwcheck"
+            android:inputType="textPassword"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+
+    <Button
+        android:text="Join"
+        android:layout_width="100dp"
+        android:layout_height="48dp"
+        android:id="@+id/bt_Join"
+        android:textAlignment="center"
+        android:layout_marginTop="30dp"
+        android:layout_below="@+id/signup_pwcheck"
+        tools:ignore="HardcodedText" />
+
+</LinearLayout>

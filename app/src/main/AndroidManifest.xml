@@ -14,8 +14,7 @@
         <activity
             android:name=".MainActivity"
             android:label=" "
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,10 +35,13 @@
         <activity android:name=".KakaoSDKAdapter" />
         <activity android:name=".Shopping" />
         <activity android:name=".TabPagerAdapter" />
-        <activity android:name=".F2_listview"></activity>
+        <activity android:name=".F2_listview" />
+
         <meta-data
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_app_key" />
+
+        <activity android:name=".Login_Sign_up"></activity>
     </application>
 
 </manifest>

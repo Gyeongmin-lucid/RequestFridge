@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">RequestFridge</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="font_fontFamily_medium">sans-serif-medium</string>
+    <string name="action_settings">Settings</string>
+</resources>

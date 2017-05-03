@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="내용물 정렬 방법">
+        <menu>
+            <item
+                android:title=""
+                android:id="@+id/nav_sort_spinner"
+                app:actionLayout="@layout/spinner"></item>
+        </menu>
+    </item>
+    <item android:title="유통기한 알림"
+        android:id="@+id/alarm_switch"
+        app:showAsAction="always"
+        android:actionViewClass="android.support.v7.widget.SwitchCompat"
+        app:actionLayout="@layout/menu_switch">
+        <menu>
+            <item
+                android:title=""
+                android:id="@+id/nav_alarm_spinner"
+                app:actionLayout="@layout/spinner"></item></menu>
+    </item>
+<item android:title="즐겨찾기 관리"
+android:id="@+id/book_mark"></item>
+<item android:title="로그인"
+        android:id="@+id/login"></item>
+</menu>

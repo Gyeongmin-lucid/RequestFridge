@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:id="@+id/f2_relative"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_centerInParent="true"
+        android:background="@color/white">
+
+
+        <Button
+            android:id="@+id/f2_cancel"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
+            android:background="@drawable/cancel" />
+
+        <TextView
+            android:id="@+id/f2_textview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:layout_weight="1"
+            android:layout_below="@id/f2_cancel"
+            android:text="보관장소"
+            android:textColor="@color/tabcolor"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+
+        <!--물품에 대한 layout-->
+        <LinearLayout
+            android:id="@+id/firstlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:orientation="horizontal"
+            android:layout_below="@+id/f2_textview">
+
+            <Button
+                android:id="@+id/f2_freeze"
+                android:padding="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="냉동"
+                android:textColor="@color/tabcolor"
+                android:background="@color/white"/>
+            <Button
+                android:id="@+id/f2_cold"
+                android:padding="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="냉장"
+                android:textColor="@color/tabcolor"
+                android:background="@color/white"/>
+            <Button
+                android:id="@+id/f2_out"
+                android:padding="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="실온"
+                android:textColor="@color/tabcolor"
+                android:background="@color/white"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/secondlayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/firstlayout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="물품이름"
+                android:textColor="@color/tabcolor"/>
+            <EditText
+                android:id="@+id/f2_listname"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/Black"
+                />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+    <LinearLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:orientation="vertical"
+        android:layout_below="@+id/relative"
+        android:background="@color/lighBlack"
+        ></LinearLayout>
+    <LinearLayout
+        android:id="@+id/f2_linelayout"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/linelayout"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/f2_leftbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:text="계속 추가하기"
+            android:textColor="#FF0000"
+            android:background="@color/alpha"/>
+
+        <Button
+            android:id="@+id/f2_rightbtn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:text="등록"
+            android:textColor="@color/Black"
+            android:background="@color/alpha"/>
+
+    </LinearLayout>
+
+</LinearLayout>
