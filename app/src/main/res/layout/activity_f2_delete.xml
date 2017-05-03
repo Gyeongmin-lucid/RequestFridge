@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:id="@+id/f2_delete_relative"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_centerInParent="true"
+        android:background="@color/white">
+
+        <LinearLayout
+            android:id="@+id/f2_delete_first"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="삭제하시겠습니까?"
+                android:textSize="20dp"
+                android:textColor="@color/Black"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/f2_delete_second"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_below="@id/f2_delete_first"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/f2_delete_yes"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:text="예"
+            android:textColor="@color/Black"
+            android:background="@color/alpha"/>
+
+        <Button
+            android:id="@+id/f2_delete_no"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:text="아니요"
+            android:textColor="@color/Black"
+            android:background="@color/alpha"/>
+
+    </LinearLayout>
+
+</LinearLayout>
