@@ -162,6 +162,7 @@ public class F2_Dialog  extends Dialog {
             }
         });
 
+
         //'등록'에 대한 event
         f2_rightbtn.setOnClickListener(new View.OnClickListener() {
             @Override
