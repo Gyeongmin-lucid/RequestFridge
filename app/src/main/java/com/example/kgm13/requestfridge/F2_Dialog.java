@@ -30,6 +30,10 @@ import static com.example.kgm13.requestfridge.F2_List.listView_out;
 
 public class F2_Dialog  extends Dialog {
 
+    ////////////////////////////DB 변수////////////////////////////
+    F2_DBManager dbManager;
+    static boolean db2_check = false;
+
     ////////////////////////////dialog 변수////////////////////////////
     private String location;    // 물품위치
     private String listname;    // 물품이름
@@ -71,23 +75,15 @@ public class F2_Dialog  extends Dialog {
         setContentView(R.layout.activity_f2_dialog);
         ButterKnife.bind(this);
 
+        dbManager = new F2_DBManager(getContext().getApplicationContext(), "List.db", null, 1);
+
         f2_freeze.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(!freeze){
-                   freeze = true;
+                    freeze = true;
                     f2_freeze.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
                     f2_freeze.setTextColor(getContext().getResources().getColor(R.color.white));
-                    if(cold) {
-                        cold = false;
-                        f2_cold.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                        f2_cold.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
-                    }
-                    if(out) {
-                        out = false;
-                        f2_out.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                        f2_out.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
-                    }
                 }
                 else{
                     freeze = false;
@@ -103,16 +99,6 @@ public class F2_Dialog  extends Dialog {
                     cold = true;
                     f2_cold.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
                     f2_cold.setTextColor(getContext().getResources().getColor(R.color.white));
-                    if(freeze) {
-                        freeze = false;
-                        f2_freeze.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                        f2_freeze.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
-                    }
-                    if(out) {
-                        out = false;
-                        f2_out.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                        f2_out.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
-                    }
                 }
                 else{
                     cold = false;
@@ -128,16 +114,6 @@ public class F2_Dialog  extends Dialog {
                     out = true;
                     f2_out.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
                     f2_out.setTextColor(getContext().getResources().getColor(R.color.white));
-                    if(freeze) {
-                        freeze = false;
-                        f2_freeze.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                        f2_freeze.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
-                    }
-                    if(cold) {
-                        cold = false;
-                        f2_cold.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                        f2_cold.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
-                    }
                 }
                 else{
                     out = false;
@@ -161,24 +137,31 @@ public class F2_Dialog  extends Dialog {
                         arrayList_freeze.add(new Shopping(listname));
                         adapter_freeze.notifyDataSetChanged();
                         listView_freeze.setAdapter(adapter_freeze);
+                        dbManager.insert("insert into LIST values(null, " + "'freeze', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
                     if (cold) {
                         arrayList_cold.add(new Shopping(listname));
                         adapter_cold.notifyDataSetChanged();
                         listView_cold.setAdapter(adapter_cold);
+                        dbManager.insert("insert into LIST values(null, " + "'cold', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
                     if (out) {
                         arrayList_out.add(new Shopping(listname));
                         adapter_out.notifyDataSetChanged();
                         listView_out.setAdapter(adapter_out);
+                        dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
+
+                    db2_check = true;
                     Snackbar.make(v, listname + "이 추가되었습니다!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    f2_listname.setText("");
 
                 } else {
                     Snackbar.make(v, "버튼 설정을 다시 확인해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
             }
         });
+
 
         //'등록'에 대한 event
         f2_rightbtn.setOnClickListener(new View.OnClickListener() {
@@ -190,18 +173,23 @@ public class F2_Dialog  extends Dialog {
                         arrayList_freeze.add(new Shopping(listname));
                         adapter_freeze.notifyDataSetChanged();
                         listView_freeze.setAdapter(adapter_freeze);
+                        dbManager.insert("insert into LIST values(null, " + "'freeze', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
                     if (cold) {
                         arrayList_cold.add(new Shopping(listname));
                         adapter_cold.notifyDataSetChanged();
                         listView_cold.setAdapter(adapter_cold);
+                        dbManager.insert("insert into LIST values(null, " + "'cold', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
                     if (out) {
                         arrayList_out.add(new Shopping(listname));
                         adapter_out.notifyDataSetChanged();
                         listView_out.setAdapter(adapter_out);
+                        dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
-                    Snackbar.make(v, listname + "이 추가되었습니다!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+
+                    //Snackbar.make(v, listname + "이 추가되었습니다!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    db2_check = true;
                     dismiss();
 
                 } else {
