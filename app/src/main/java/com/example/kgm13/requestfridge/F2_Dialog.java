@@ -35,33 +35,19 @@ public class F2_Dialog  extends Dialog {
     static boolean db2_check = false;
 
     ////////////////////////////dialog 변수////////////////////////////
-    private String location;    // 물품위치
-    private String listname;    // 물품이름
-    Boolean freeze = false;
-    Boolean cold = false;
-    Boolean out = false;
+    //library를 이용해서 xml의 id를 불러옴
+    //gradle에 compile 'com.jakewharton:butterknife:7.0.1'추가
+    //onCreate부의 setContentView밑에 ButteerKnife.bing(this); 추가
+    private String location, listname;    // 물품위치, 물품 이름
+    Boolean freeze = false, cold = false, out = false;
 
-    @Nullable @Bind(R.id.f2_cancel)
-    Button f2_cancel;
-
-    @Nullable @Bind(R.id.f2_freeze)
-    Button f2_freeze;
-
-    @Nullable @Bind(R.id.f2_cold)
-    Button f2_cold;
-
-    @Nullable @Bind(R.id.f2_out)
-    Button f2_out;
-
-    @Nullable @Bind(R.id.f2_listname)
-    EditText f2_listname;
-
-
-    @Nullable @Bind(R.id.f2_leftbtn)
-    Button f2_leftbtn;
-
-    @Nullable @Bind(R.id.f2_rightbtn)
-    Button f2_rightbtn;
+    @Nullable @Bind(R.id.f2_cancel) Button f2_cancel;
+    @Nullable @Bind(R.id.f2_freeze) Button f2_freeze;
+    @Nullable @Bind(R.id.f2_cold) Button f2_cold;
+    @Nullable @Bind(R.id.f2_out) Button f2_out;
+    @Nullable @Bind(R.id.f2_listname) EditText f2_listname;
+    @Nullable @Bind(R.id.f2_leftbtn) Button f2_leftbtn;
+    @Nullable @Bind(R.id.f2_rightbtn) Button f2_rightbtn;
 
 
     public F2_Dialog(Context context) {
