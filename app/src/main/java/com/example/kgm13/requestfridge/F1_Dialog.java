@@ -142,8 +142,11 @@ public class F1_Dialog extends Dialog {
                 EditToString();
                 if (dayleft < 0 || (TextUtils.isEmpty(listname)))
                     Snackbar.make(v, "설정을 다시해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                else
+                else {
                     getData();
+                    Snackbar.make(v, listname +"이(가) 추가되었습니다!", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
+                }
+
 
                 db1_check = true;
             }
@@ -341,7 +344,6 @@ public class F1_Dialog extends Dialog {
         gridArray.add(item_temp);
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
-
 
         dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
     }
