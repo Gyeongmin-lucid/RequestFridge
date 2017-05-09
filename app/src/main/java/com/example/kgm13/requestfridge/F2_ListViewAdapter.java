@@ -1,8 +1,6 @@
 package com.example.kgm13.requestfridge;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +27,10 @@ public class F2_ListViewAdapter extends BaseAdapter implements View.OnClickListe
     private ArrayList<Shopping> arraylist;
 
 
+    ///////////////////////////DB변수///////////////////////////////////////////
+    F2_DBManager dbManager;
+
+
     // ListViewAdapter의 생성자
 
     public F2_ListViewAdapter(Context context_, List<Shopping> Shoppinglist_) {
@@ -37,6 +39,7 @@ public class F2_ListViewAdapter extends BaseAdapter implements View.OnClickListe
         inflater = LayoutInflater.from(mContext);
         inflater_final = LayoutInflater.from(context_final);
 
+        dbManager = new F2_DBManager(mContext.getApplicationContext(), "List.db", null, 1); //adapter생성시 dbmanager도 동시에선언
         this.arraylist = new ArrayList<Shopping>();
         this.arraylist.addAll(Shoppinglist);
     }
@@ -86,24 +89,31 @@ public class F2_ListViewAdapter extends BaseAdapter implements View.OnClickListe
         holder.favorite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(holder.favorite.isChecked()) {
-                    holder.favorite.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.star_full));
+                if (!holder.favorite.isChecked()) {
+                    holder.favorite.setChecked(false);
+                    dbManager.update("update LIST set favorite = " + 0 + " where name = '" + holder.list.getText().toString() + "';");
                 }
-                else {
-                    holder.favorite.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.star_blank));
+                else{
+                    holder.favorite.setChecked(true);
+                    dbManager.update("update LIST set favorite = " + 1 + " where name = '" + holder.list.getText().toString() + "';");
+
                 }
 
             }
         });
         holder.list.setText(Shoppinglist.get(position).getList());
 
+        holder.button.setTag(position);
         holder.button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Shoppinglist.remove(position);
+                int pos = (int)v.getTag();
+                Shoppinglist.remove(pos);
+                //arraylist.remove(pos);
                 notifyDataSetChanged();
-                Snackbar.make(v, "삭제되었습니다", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                }
+
+                dbManager.update("update LIST set del = " + 1 + " where name = '" + holder.list.getText().toString() + "';");
+            }
         });
 
         return view;

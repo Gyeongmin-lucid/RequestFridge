@@ -82,7 +82,7 @@ public class MLRoundedImageView extends android.support.v7.widget.AppCompatImage
 
         return output;
     }
-    public static Bitmap border(Bitmap bitmap, int a){
+    public static Bitmap border(Bitmap bitmap, int expDay){
         int w = bitmap.getWidth();
         int h = bitmap.getHeight();
 
@@ -103,9 +103,8 @@ public class MLRoundedImageView extends android.support.v7.widget.AppCompatImage
         c.drawBitmap(bitmap, 5, 5, p);
         p.setXfermode(null);
         p.setStyle(Paint.Style.STROKE);
-        if (a < 3) p.setColor(Color.parseColor("#FF0000"));
-        else if(a <10) p.setColor(Color.parseColor("#ABF200"));
-        else p.setColor(Color.parseColor("#078fea"));
+        if (expDay > 3) p.setColor(Color.parseColor("#ABF200"));
+        else p.setColor(Color.parseColor("#FF0000"));
         p.setStrokeWidth(6);
         c.drawCircle((w / 2) + 5, (h / 2) + 5, radius, p);
 
