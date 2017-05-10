@@ -1,30 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
 
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <item
-        android:title="내용물 정렬 방법">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:title="내용물 정렬 방법">
         <menu>
             <item
-                android:title=""
                 android:id="@+id/nav_sort_spinner"
+                android:title=""
                 app:actionLayout="@layout/spinner"></item>
         </menu>
     </item>
-    <item android:title="유통기한 알림"
+    <item
         android:id="@+id/alarm_switch"
-        app:showAsAction="always"
         android:actionViewClass="android.support.v7.widget.SwitchCompat"
-        app:actionLayout="@layout/menu_switch">
+        android:title="유통기한 알림"
+        app:actionLayout="@layout/menu_switch"
+        app:showAsAction="always">
         <menu>
             <item
-                android:title=""
                 android:id="@+id/nav_alarm_spinner"
-                app:actionLayout="@layout/spinner"></item></menu>
+                android:title=""
+                app:actionLayout="@layout/spinner"></item>
+        </menu>
     </item>
-<item android:title="즐겨찾기 관리"
-android:id="@+id/book_mark"></item>
-<item android:title="로그인"
-        android:id="@+id/login"></item>
+    <item
+        android:id="@+id/book_mark"
+        android:title="즐겨찾기 관리"></item>
+    <item
+        android:id="@+id/login"
+        android:title="로그인"></item>
+    <item
+        android:id="@+id/logout"
+        android:title="로그아웃"></item>
 </menu>

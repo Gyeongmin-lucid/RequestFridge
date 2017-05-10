@@ -1,11 +1,14 @@
 package com.example.kgm13.requestfridge;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.kakao.auth.ErrorCode;
 import com.kakao.auth.ISessionCallback;
@@ -18,19 +21,30 @@ import com.kakao.usermgmt.response.model.UserProfile;
 import com.kakao.util.exception.KakaoException;
 import com.kakao.util.helper.log.Logger;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 /**
  * Created by KYS on 2017-04-06.
  */
 
 public class LoginActivity extends AppCompatActivity {
-    public Button btn2;
-    public Button btnsignup;
+    @Nullable @Bind(R.id.button_nonmem) Button btnnonmem;
+    @Nullable @Bind(R.id.button_signup) Button btnsignup;
+    @Nullable @Bind(R.id.button_signin) Button butsignin;
+    @Nullable @Bind(R.id.login_id) EditText editlogid;
+    @Nullable @Bind(R.id.login_pw) EditText editlogpw;
+
     SessionCallback callback;
+
+    BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        ButterKnife.bind(this);
+        backPressCloseHandler = new BackPressCloseHandler(this);
 
         UserManagement.requestLogout(new LogoutResponseCallback() {
             @Override
@@ -42,14 +56,13 @@ public class LoginActivity extends AppCompatActivity {
         callback = new SessionCallback();
         Session.getCurrentSession().addCallback(callback);
 
-        btn2 = (Button)findViewById(R.id.button2);
-        btnsignup = (Button) findViewById(R.id.buttton_signup);
 
-        btn2.setOnClickListener(new View.OnClickListener() {
+        btnnonmem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -58,8 +71,19 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(LoginActivity.this, Login_Sign_up.class);
                 startActivity(intent);
+                finish();
             }
         });
+
+        editlogid.setBackgroundColor(Color.argb(80, 0, 0, 0));
+        editlogpw.setBackgroundColor(Color.argb(80, 0, 0, 0));
+        butsignin.setBackgroundColor(Color.argb(95, 0, 0, 0));
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        backPressCloseHandler.onBackPressed();
     }
 
     private class SessionCallback implements ISessionCallback {
@@ -103,5 +127,7 @@ public class LoginActivity extends AppCompatActivity {
         public void onSessionOpenFailed(KakaoException exception) {
 
         }
+
+
     }
 }

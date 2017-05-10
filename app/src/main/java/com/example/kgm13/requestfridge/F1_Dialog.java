@@ -70,27 +70,13 @@ public class F1_Dialog extends Dialog {
     //gradle에 compile 'com.jakewharton:butterknife:7.0.1'추가
     //onCreate부의 setContentView밑에 ButteerKnife.bing(this); 추가
 
-    @Nullable
-    @Bind(R.id.f1_cancel)
-    Button f1_cancel;
-    @Nullable
-    @Bind(R.id.f1_listname)
-    EditText f1_listname;
-    @Nullable
-    @Bind(R.id.f1_listcount)
-    EditText f1_listcount;
-    @Nullable
-    @Bind(R.id.f1_datepicker)
-    DatePicker f1_datepicker;
-    @Nullable
-    @Bind(R.id.f1_memo)
-    EditText f1_memo;
-    @Nullable
-    @Bind(R.id.f1_leftbtn)
-    Button f1_leftbtn;
-    @Nullable
-    @Bind(R.id.f1_rightbtn)
-    Button f1_rightbtn;
+    @Nullable @Bind(R.id.f1_cancel) Button f1_cancel;
+    @Nullable @Bind(R.id.f1_listname) EditText f1_listname;
+    @Nullable @Bind(R.id.f1_listcount) EditText f1_listcount;
+    @Nullable @Bind(R.id.f1_datepicker) DatePicker f1_datepicker;
+    @Nullable @Bind(R.id.f1_memo) EditText f1_memo;
+    @Nullable @Bind(R.id.f1_leftbtn) Button f1_leftbtn;
+    @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
 
     public F1_Dialog(Context context) {

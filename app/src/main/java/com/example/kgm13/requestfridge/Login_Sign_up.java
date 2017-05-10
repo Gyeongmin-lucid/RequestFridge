@@ -1,5 +1,6 @@
 package com.example.kgm13.requestfridge;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -29,11 +30,14 @@ public class Login_Sign_up extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 EditToStirng();
-                if(sPw.equals(sPw_chk)) {
+                if (sPw.equals(sPw_chk)) {
                     Login_registDB rdb = new Login_registDB(sId, sPw);
                     rdb.execute();
-                }
-                else {
+
+                    Intent intent = new Intent(Login_Sign_up.this, MainActivity.class);
+                    startActivity(intent);
+                    finish();
+                } else {
                     Snackbar.make(view, "비밀번호를 확인해주세요", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
             }
@@ -48,6 +52,12 @@ public class Login_Sign_up extends AppCompatActivity {
         sPw = signup_pw.getText().toString();
         sPw_chk = signup_pwcheck.getText().toString();
 
+    }
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(Login_Sign_up.this, LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
 

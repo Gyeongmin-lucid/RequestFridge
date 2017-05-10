@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -31,6 +32,9 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 import static com.example.kgm13.requestfridge.F1_Dialog.db1_check;
 import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
@@ -38,32 +42,39 @@ import static com.example.kgm13.requestfridge.F2_List.f2_view;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CompoundButton.OnCheckedChangeListener {
 
-    Toolbar toolbar;
-    private TabLayout tabLayout;    // 타이틀 3개를 나눠주는 tablayout
-    private ViewPager viewPager;    // 3개의 각각 layout를 띄울 페이저 변수
+    private TabLayout tabLayout;                    // 타이틀 3개를 나눠주는 tablayout
+    private ViewPager viewPager;                    // 3개의 각각 layout를 띄울 페이저 변수
     public static Context context_final;
-    FloatingActionButton fab;
+    @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
+    @Nullable @Bind(R.id.fab) FloatingActionButton fab;
 
+    //menuitem
+    @Nullable @Bind(R.id.login) MenuItem login;
+    @Nullable @Bind(R.id.logout) MenuItem logout;
     //spinner 내부
     private String[] NavSortItem = { "유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
     private String[] NavAlarmDateItem = {"1일", "2일","3일", "5일", "7일"};
-    boolean f1 = true;
-    boolean f2 = false;
 
-    public static String PACKAGE_NAME;
+    //viewpiger 변수
+    boolean f1 = true;                              //fridge에 대한 페이저 view on,off 확인
+    boolean f2 = false;                             //list에 대한 페이저 view on,off 확인
+
+    public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
+    BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        backPressCloseHandler = new BackPressCloseHandler(this);
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
         context_final = this;
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,7 +188,6 @@ public class MainActivity extends AppCompatActivity
             editor.putBoolean("F1_db", true); //First라는 key값으로 infoFirst 데이터를 저장한다.
             editor.commit();
         }
-
         super.onStop();
     }
 
@@ -190,6 +200,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+        backPressCloseHandler.onBackPressed();
     }
 
     @Override
@@ -201,28 +212,19 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_sort_spinner) {
         }
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -231,7 +233,6 @@ public class MainActivity extends AppCompatActivity
 
     /*************************************** main Tablayout **********************************************/
     private void setupTabIcons() {
-
         TextView tabOne = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
         tabOne.setText("냉장고");
         tabOne.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.refrigerator, 0, 0);
