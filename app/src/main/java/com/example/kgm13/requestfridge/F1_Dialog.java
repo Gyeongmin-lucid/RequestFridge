@@ -333,9 +333,8 @@ public class F1_Dialog extends Dialog {
         gridArray.add(item_temp);
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
-        System.out.println("===================login_check : " + login_check + "\n");
         if(login_check) {
-            setData();
+            setData(image);
         }
         dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
     }
@@ -348,12 +347,16 @@ public class F1_Dialog extends Dialog {
         return bitmap;
     }
 
-    void setData() {
+    void setData(int image) {
+
         class set_fridge extends AsyncTask<Void, Integer, Void> {
+            int img;
+            set_fridge(int par_img){
+                img = par_img;
+            }
             @Override
             protected Void doInBackground(Void... params) {
-                System.out.println("===================login_id : " + login_id + "\n");
-                String param = "&u_id=" + login_id + "&u_location=" + location + "&u_imageUrl=" + url+ "&u_name=" + listname + "&u_year=" + String.valueOf(year) +
+                String param = "&u_id=" + login_id + "&u_location=" + location + "&u_imageUrl=" + String.valueOf(img)+ "&u_name=" + listname + "&u_year=" + String.valueOf(year) +
                         "&u_month=" + String.valueOf(month) + "&u_day=" + String.valueOf(day) + "&u_del=" + "0";
                 try {
                     URL url = new URL("http://13.124.64.178/set_fridge.php");
@@ -394,7 +397,7 @@ public class F1_Dialog extends Dialog {
                     return null;
             }
         }
-        set_fridge g = new set_fridge();
+        set_fridge g = new set_fridge(image);
         g.execute();
     }
 }

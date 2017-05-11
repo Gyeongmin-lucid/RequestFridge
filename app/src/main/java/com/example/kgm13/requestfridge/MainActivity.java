@@ -261,7 +261,6 @@ public class MainActivity extends AppCompatActivity
     {
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu nav_Menu = navigationView.getMenu();
-        System.out.println("================login_check : " + login_check);
         if(login_check){
             nav_Menu.findItem(R.id.login).setVisible(false);
         }

@@ -2,14 +2,25 @@ package com.example.kgm13.requestfridge;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,6 +34,7 @@ import static com.example.kgm13.requestfridge.F2_List.arrayList_out;
 import static com.example.kgm13.requestfridge.F2_List.listView_cold;
 import static com.example.kgm13.requestfridge.F2_List.listView_freeze;
 import static com.example.kgm13.requestfridge.F2_List.listView_out;
+import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 
 /**
  * Created by kgm13 on 2017-04-09.
@@ -137,7 +149,7 @@ public class F2_Dialog  extends Dialog {
                         listView_out.setAdapter(adapter_out);
                         dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
-
+                    setData();
                     db2_check = true;
                     Snackbar.make(v, listname + "이 추가되었습니다!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                     f2_listname.setText("");
@@ -173,8 +185,7 @@ public class F2_Dialog  extends Dialog {
                         listView_out.setAdapter(adapter_out);
                         dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
                     }
-
-                    //Snackbar.make(v, listname + "이 추가되었습니다!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    setData();
                     db2_check = true;
                     dismiss();
 
@@ -228,7 +239,9 @@ public class F2_Dialog  extends Dialog {
     //////////////////dialog-editext에 대해 string 변환//////////////////
     public void EditToString(){
         listname = f2_listname.getText().toString();
-
+        if(freeze) location = "freeze";
+        if(cold)   location = "cold";
+        if(out)    location = "out";
     }
 
     //버튼 1개 이상 혹은 체크를 안했을때를 체킹 하는 함수
@@ -243,5 +256,54 @@ public class F2_Dialog  extends Dialog {
         else{
             return false;
         }
+    }
+    ////////////////////////// android  ->  MYsql  연동////////////////////////////////////////
+    void setData() {
+
+        class set_list extends AsyncTask<Void, Integer, Void> {
+            @Override
+            protected Void doInBackground(Void... params) {
+                String param = "&u_id=" + login_id + "&u_location=" + location + "&u_favorite=" + "0" + "&u_name=" + listname + "&u_del=" + "0";
+                try {
+                    URL url = new URL("http://13.124.64.178/set_list.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    //is = conn.getErrorStream();
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+                    String line = null;
+                    StringBuffer buff = new StringBuffer();
+                    while ( ( line = in.readLine() ) != null )
+                    {
+                        buff.append(line + "\n");
+                    }
+                    data = buff.toString().trim();
+                    Log.e("RECV DATA",data);
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }
+        set_list g = new set_list();
+        g.execute();
     }
 }
