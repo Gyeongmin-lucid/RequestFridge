@@ -1,6 +1,7 @@
 package com.example.kgm13.requestfridge;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -11,6 +12,8 @@ import android.widget.EditText;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+
+import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 
 public class Login_Sign_up extends AppCompatActivity {
     @Nullable @Bind(R.id.signup_id) EditText signup_id;
@@ -33,6 +36,12 @@ public class Login_Sign_up extends AppCompatActivity {
                 if (sPw.equals(sPw_chk)) {
                     Login_registDB rdb = new Login_registDB(sId, sPw);
                     rdb.execute();
+
+                    SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = term.edit();
+                    editor.putString("ID", login_id); //First라는 key값으로 infoFirst 데이터를 저장한다.
+                    editor.putBoolean("login_check", true);
+                    editor.commit();
 
                     Intent intent = new Intent(Login_Sign_up.this, MainActivity.class);
                     startActivity(intent);

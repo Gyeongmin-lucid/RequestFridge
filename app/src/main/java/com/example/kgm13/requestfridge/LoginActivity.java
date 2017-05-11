@@ -41,24 +41,15 @@ import butterknife.ButterKnife;
  */
 
 public class LoginActivity extends AppCompatActivity {
-    @Nullable
-    @Bind(R.id.button_nonmem)
-    Button btnnonmem;
-    @Nullable
-    @Bind(R.id.button_signup)
-    Button btnsignup;
-    @Nullable
-    @Bind(R.id.button_signin)
-    Button butsignin;
-    @Nullable
-    @Bind(R.id.login_id)
-    EditText editlogid;
-    @Nullable
-    @Bind(R.id.login_pw)
-    EditText editlogpw;
+    @Nullable @Bind(R.id.button_nonmem) Button btnnonmem;
+    @Nullable @Bind(R.id.button_signup) Button btnsignup;
+    @Nullable @Bind(R.id.button_signin) Button butsignin;
+    @Nullable @Bind(R.id.login_id)      EditText editlogid;
+    @Nullable @Bind(R.id.login_pw)      EditText editlogpw;
 
-    String str_editlogid, str_editlogpw;
+    public static String login_id, login_pw;
     SessionCallback callback;
+    public static boolean login_check = false;
 
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
@@ -100,8 +91,8 @@ public class LoginActivity extends AppCompatActivity {
         butsignin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                str_editlogid = editlogid.getText().toString();
-                str_editlogpw = editlogpw.getText().toString();
+                login_id = editlogid.getText().toString();
+                login_pw = editlogpw.getText().toString();
                 getsignin();
 
             }
@@ -163,7 +154,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             protected String doInBackground(String... params) {
-                String param = "&u_id=" + str_editlogid + "&u_pw=" + str_editlogpw;
+                String param = "&u_id=" + login_id + "&u_pw=" + login_pw;
                 try {
                     URL url = new URL("http://13.124.64.178/sign_in.php");
 
@@ -214,14 +205,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void showlogResult(String myJSON) {
-        if (myJSON.equals(str_editlogid)) {
+        if (!login_id.equals("") && myJSON.equals(login_id)) {
             SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
             SharedPreferences.Editor editor = term.edit();
-            editor.putString("ID", str_editlogid); //First라는 key값으로 infoFirst 데이터를 저장한다.
+            editor.putString("ID", login_id); //First라는 key값으로 infoFirst 데이터를 저장한다.
+            editor.putBoolean("login_check", true);
             editor.commit();
+
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             startActivity(intent);
             finish();
+
         } else {
             Toast toast = Toast.makeText(this, "아이디나 비밀번호를 확인해 주세요!.", Toast.LENGTH_SHORT);
             toast.show();

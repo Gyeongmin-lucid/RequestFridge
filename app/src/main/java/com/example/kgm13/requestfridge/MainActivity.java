@@ -2,6 +2,7 @@ package com.example.kgm13.requestfridge;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -38,6 +39,8 @@ import butterknife.ButterKnife;
 import static com.example.kgm13.requestfridge.F1_Dialog.db1_check;
 import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
+import static com.example.kgm13.requestfridge.LoginActivity.login_check;
+import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CompoundButton.OnCheckedChangeListener {
@@ -48,9 +51,9 @@ public class MainActivity extends AppCompatActivity
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
 
-    //menuitem
-    @Nullable @Bind(R.id.login) MenuItem login;
-    @Nullable @Bind(R.id.logout) MenuItem logout;
+    //navigation 변수
+    NavigationView navigationView;
+
     //spinner 내부
     private String[] NavSortItem = { "유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
     private String[] NavAlarmDateItem = {"1일", "2일","3일", "5일", "7일"};
@@ -68,6 +71,12 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
+
+        SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
+        login_check = term.getBoolean("login_check", false);
+        if(login_check){
+            login_id = term.getString("ID", "");
+        }
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
         context_final = this;
@@ -177,7 +186,10 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+        hideItem();
     }
+
+
 
 
     @Override
@@ -203,9 +215,9 @@ public class MainActivity extends AppCompatActivity
         backPressCloseHandler.onBackPressed();
     }
 
+    //로그인에 대한 보이고 안보이고의 상태 변화
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -216,8 +228,10 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -225,10 +239,35 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         if (id == R.id.nav_sort_spinner) {
         }
+        if (id == R.id.logout){
+            login_check = false;
+            SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
+            SharedPreferences.Editor editor = term.edit();
+            editor.putString("ID", ""); //First라는 key값으로 infoFirst 데이터를 저장한다.
+            editor.putBoolean("login_check", false);
+            editor.commit();
+
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void hideItem()
+    {
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu nav_Menu = navigationView.getMenu();
+        System.out.println("================login_check : " + login_check);
+        if(login_check){
+            nav_Menu.findItem(R.id.login).setVisible(false);
+        }
+        else{
+            nav_Menu.findItem(R.id.logout).setVisible(false);
+        }
     }
 
     /*************************************** main Tablayout **********************************************/
@@ -261,6 +300,8 @@ public class MainActivity extends AppCompatActivity
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
     }
+
+
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
