@@ -1,7 +1,9 @@
 package com.example.kgm13.requestfridge;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.kakao.auth.ErrorCode;
 import com.kakao.auth.ISessionCallback;
@@ -21,6 +24,15 @@ import com.kakao.usermgmt.response.model.UserProfile;
 import com.kakao.util.exception.KakaoException;
 import com.kakao.util.helper.log.Logger;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
@@ -29,12 +41,23 @@ import butterknife.ButterKnife;
  */
 
 public class LoginActivity extends AppCompatActivity {
-    @Nullable @Bind(R.id.button_nonmem) Button btnnonmem;
-    @Nullable @Bind(R.id.button_signup) Button btnsignup;
-    @Nullable @Bind(R.id.button_signin) Button butsignin;
-    @Nullable @Bind(R.id.login_id) EditText editlogid;
-    @Nullable @Bind(R.id.login_pw) EditText editlogpw;
+    @Nullable
+    @Bind(R.id.button_nonmem)
+    Button btnnonmem;
+    @Nullable
+    @Bind(R.id.button_signup)
+    Button btnsignup;
+    @Nullable
+    @Bind(R.id.button_signin)
+    Button butsignin;
+    @Nullable
+    @Bind(R.id.login_id)
+    EditText editlogid;
+    @Nullable
+    @Bind(R.id.login_pw)
+    EditText editlogpw;
 
+    String str_editlogid, str_editlogpw;
     SessionCallback callback;
 
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
@@ -74,6 +97,15 @@ public class LoginActivity extends AppCompatActivity {
                 finish();
             }
         });
+        butsignin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                str_editlogid = editlogid.getText().toString();
+                str_editlogpw = editlogpw.getText().toString();
+                getsignin();
+
+            }
+        });
 
         editlogid.setBackgroundColor(Color.argb(80, 0, 0, 0));
         editlogpw.setBackgroundColor(Color.argb(80, 0, 0, 0));
@@ -99,18 +131,15 @@ public class LoginActivity extends AppCompatActivity {
                     ErrorCode result = ErrorCode.valueOf(errorResult.getErrorCode());
                     if (result == ErrorCode.CLIENT_ERROR_CODE) {
                         finish();
-                    } else {
-
                     }
                 }
+
                 @Override
                 public void onSessionClosed(ErrorResult errorResult) {
-
                 }
 
                 @Override
                 public void onNotSignedUp() {
-
                 }
 
                 @Override
@@ -125,9 +154,78 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         public void onSessionOpenFailed(KakaoException exception) {
-
         }
 
+    }
+
+    public void getsignin() {
+        class GetDataJSON extends AsyncTask<String, Void, String> {
+
+            @Override
+            protected String doInBackground(String... params) {
+                String param = "&u_id=" + str_editlogid + "&u_pw=" + str_editlogpw;
+                try {
+                    URL url = new URL("http://13.124.64.178/sign_in.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+
+                    String json;
+                    StringBuilder sb = new StringBuilder();
+                    while ((json = in.readLine()) != null) {
+                        sb.append(json + "\n");
+                    }
+
+                    return sb.toString().trim();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                String myJSON = result;
+                showlogResult(myJSON);
+            }
+        }
+        GetDataJSON g = new GetDataJSON();
+        g.execute();
+    }
+
+    public void showlogResult(String myJSON) {
+        if (myJSON.equals(str_editlogid)) {
+            SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
+            SharedPreferences.Editor editor = term.edit();
+            editor.putString("ID", str_editlogid); //First라는 key값으로 infoFirst 데이터를 저장한다.
+            editor.commit();
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            Toast toast = Toast.makeText(this, "아이디나 비밀번호를 확인해 주세요!.", Toast.LENGTH_SHORT);
+            toast.show();
+        }
 
     }
 }

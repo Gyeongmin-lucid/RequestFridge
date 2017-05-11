@@ -28,7 +28,7 @@ public class Login_registDB extends AsyncTask<Void, Integer, Void> {
         try {
 /* 서버연결 */
             URL url = new URL(
-                    "http://13.124.64.178/login_join.php");
+                    "http://13.124.64.178/sign_up.php");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.setRequestMethod("POST");
