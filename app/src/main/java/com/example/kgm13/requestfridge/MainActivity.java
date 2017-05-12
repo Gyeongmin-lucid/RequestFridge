@@ -16,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
@@ -29,7 +30,6 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,7 +89,23 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 if (f1) {
-                    fab1();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder
+                            .setMessage("추가")
+                            .setPositiveButton("카메라로 추가", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent intent = new Intent(MainActivity.this, OCRActivity.class);
+                                    startActivity(intent);
+                                }
+                            })
+                            .setNegativeButton("손으로 추가", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    fab1();
+                                }
+                            });
+                    builder.create().show();
                 } else if (f2) {
                     fab2();
                 }
@@ -366,4 +382,5 @@ public class MainActivity extends AppCompatActivity
 
         dialog.show();
     }
+
 }
