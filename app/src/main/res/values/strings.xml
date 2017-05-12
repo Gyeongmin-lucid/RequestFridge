@@ -5,4 +5,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="font_fontFamily_medium">sans-serif-medium</string>
     <string name="action_settings">Settings</string>
+    <string name="id_hint"><font size="10">username</font></string>
+    <string name="pw_hint"><font size="10">password</font></string>
 </resources>
