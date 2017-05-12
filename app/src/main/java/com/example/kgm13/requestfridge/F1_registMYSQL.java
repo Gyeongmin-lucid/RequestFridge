@@ -29,9 +29,9 @@ public class F1_registMYSQL extends AsyncTask<Void, Integer, Void> {
     protected Void doInBackground(Void... unused) {
 
 /* 인풋 파라메터값 생성 */
-        String param = "&u_location=" + location + "&u_image_url" + image_url + "&u_name" + name +
-                        "&u_year" + year + "&u_month" + month + "&u_day" + day + "&u_del" + del;
-        try {
+            String param = "&u_location=" + location + "&u_image_url" + image_url + "&u_name" + name +
+                    "&u_year" + year + "&u_month" + month + "&u_day" + day + "&u_del" + del;
+            try {
 /* 서버연결 */
             URL url = new URL(
                     "http://13.124.64.178/.php");
