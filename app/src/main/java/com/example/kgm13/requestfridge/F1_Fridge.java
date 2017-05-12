@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -19,6 +20,7 @@ import java.util.Calendar;
 import butterknife.ButterKnife;
 
 import static android.content.Context.MODE_PRIVATE;
+import static com.example.kgm13.requestfridge.F1_Dialog.createImage;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
 
@@ -84,21 +86,17 @@ public class F1_Fridge extends Fragment {
                         d=dCalendar.getTimeInMillis();              //디데이날짜를 밀리타임으로 바꿈
                         r=(d-t)/(24*60*60*1000);
                         dayleft = (int)r;
-                        System.out.println("year : " + year + "month : " + month + "day : " + day + "dayleft : " + dayleft );
 
-
-                        if(image == 0){
-                            System.out.println("====================2222===================" );
-                            image = c.getInt(c.getColumnIndex("imagebitmap"));
-                            Bitmap imagebitmap = BitmapFactory.decodeResource(getContext().getResources(), image);
-                            imagebitmap = getCroppedBitmap(imagebitmap, imagebitmap.getHeight() / 2);
-                            imagebitmap = border(imagebitmap, dayleft);
-                            gridArray.add(new Item(imagebitmap, name ,dayleft));
+                        Bitmap imagebitmap;
+                        if(image != 0){
+                            imagebitmap = BitmapFactory.decodeResource(getContext().getResources(), image);
                         }
                         else{
-                            System.out.println("====================1111===================" );
-                            gridArray.add(new Item(image, name ,dayleft));
+                            imagebitmap = createImage(300, 300, Color.parseColor("#E1FF36"));
                         }
+                        imagebitmap = getCroppedBitmap(imagebitmap, imagebitmap.getHeight() / 2);
+                        imagebitmap = border(imagebitmap, dayleft);
+                        gridArray.add(new Item(imagebitmap, name ,dayleft));
                         customGridAdapter.notifyDataSetChanged();
                     }
                 }
