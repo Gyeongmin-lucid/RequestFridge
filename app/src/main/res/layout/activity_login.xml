@@ -4,32 +4,91 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/login"
+    android:background="@drawable/food_main"
     tools:context="com.example.kgm13.requestfridge.LoginActivity">
 
-    <com.kakao.usermgmt.LoginButton
-        android:layout_width="200dp"
-        android:layout_height="70dp"
-        android:layout_marginTop="300dp"
+    <EditText
+        android:id="@+id/login_id"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="160dp"
         android:layout_centerHorizontal="true"
-        android:id="@+id/button1" />
+        android:hint="@string/id_hint"
+        android:textColorHint="@color/white"
+        />
+
+    <EditText
+        android:id="@+id/login_pw"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:hint="@string/pw_hint"
+        android:inputType="textPassword"
+        android:textColorHint="@color/white"
+        android:layout_below="@+id/login_id"
+        android:layout_alignLeft="@+id/login_id"
+        android:layout_alignStart="@+id/login_id"
+        />
 
     <Button
-        android:layout_width="200dp"
-        android:layout_height="70dp"
-        android:text="회원 가입"
-        android:id="@+id/buttton_signup"
-        android:layout_below="@+id/button1"
-        android:layout_alignLeft="@+id/button1"
-        android:layout_alignStart="@+id/button1" />
+        android:id="@+id/button_signin"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="20dp"
+        android:text="Sign In"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/login_pw"
+        />
+
+    <com.kakao.usermgmt.LoginButton
+        android:id="@+id/button_kakao"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="30dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/button_signin"
+        />
+
+
+
+    <LinearLayout
+        android:id="@+id/layout_signup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/button_kakao">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="아직 회원가입을 하지 않으셨나요?" />
+
+        <Button
+            android:id="@+id/button_signup"
+            android:layout_width="70dp"
+            android:layout_height="20dp"
+            android:background="@color/alpha"
+            android:text="Sign Up"
+            android:textSize="15dp"
+            android:textColor="@color/white"
+            />
+    </LinearLayout>
+
 
     <Button
-        android:layout_width="200dp"
-        android:layout_height="70dp"
-        android:text="비회원 로그인"
-        android:id="@+id/button2"
-        android:layout_below="@+id/buttton_signup"
-        android:layout_alignLeft="@+id/buttton_signup"
-        android:layout_alignStart="@+id/buttton_signup" />
+        android:id="@+id/button_nonmem"
+        android:layout_width="100dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="10dp"
+        android:background="@color/alpha"
+        android:layout_centerHorizontal="true"
+        android:text="비회원으로 로그인"
+        android:textSize="10dp"
+        android:textColor="@color/white"
+        android:layout_below="@+id/layout_signup"
+        />
+
+
 
 </RelativeLayout>

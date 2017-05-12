@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,6 +41,8 @@ import butterknife.ButterKnife;
 import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
+import static com.example.kgm13.requestfridge.LoginActivity.login_check;
+import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
 import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
@@ -56,7 +59,7 @@ public class F1_Dialog extends Dialog {
     static boolean db1_check = false;
 
     ////////////////////////////dialog 변수////////////////////////////
-    String listname, listcount, memo;    // 물품병, 개수 , 메모
+    String listname, listcount, memo, url;    // 물품병, 개수 , 메모, image_url
     String location = "cold";      // 위치
 
     Calendar c;
@@ -70,27 +73,13 @@ public class F1_Dialog extends Dialog {
     //gradle에 compile 'com.jakewharton:butterknife:7.0.1'추가
     //onCreate부의 setContentView밑에 ButteerKnife.bing(this); 추가
 
-    @Nullable
-    @Bind(R.id.f1_cancel)
-    Button f1_cancel;
-    @Nullable
-    @Bind(R.id.f1_listname)
-    EditText f1_listname;
-    @Nullable
-    @Bind(R.id.f1_listcount)
-    EditText f1_listcount;
-    @Nullable
-    @Bind(R.id.f1_datepicker)
-    DatePicker f1_datepicker;
-    @Nullable
-    @Bind(R.id.f1_memo)
-    EditText f1_memo;
-    @Nullable
-    @Bind(R.id.f1_leftbtn)
-    Button f1_leftbtn;
-    @Nullable
-    @Bind(R.id.f1_rightbtn)
-    Button f1_rightbtn;
+    @Nullable @Bind(R.id.f1_cancel) Button f1_cancel;
+    @Nullable @Bind(R.id.f1_listname) EditText f1_listname;
+    @Nullable @Bind(R.id.f1_listcount) EditText f1_listcount;
+    @Nullable @Bind(R.id.f1_datepicker) DatePicker f1_datepicker;
+    @Nullable @Bind(R.id.f1_memo) EditText f1_memo;
+    @Nullable @Bind(R.id.f1_leftbtn) Button f1_leftbtn;
+    @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
 
     public F1_Dialog(Context context) {
@@ -145,10 +134,8 @@ public class F1_Dialog extends Dialog {
                 else {
                     getData();
                     Snackbar.make(v, listname +"이(가) 추가되었습니다!", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
+                    db1_check = true;
                 }
-
-
-                db1_check = true;
             }
         });
 
@@ -159,11 +146,13 @@ public class F1_Dialog extends Dialog {
                 EditToString();
                 if (dayleft < 0 || (TextUtils.isEmpty(listname)))
                     Snackbar.make(v, "설정을 다시해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                else
+                else {
                     getData();
+                    db1_check = true;
+                    dismiss();
+                }
 
-                db1_check = true;
-                dismiss();
+
             }
         });
         f1_cancel.setOnTouchListener(new View.OnTouchListener()
@@ -238,7 +227,7 @@ public class F1_Dialog extends Dialog {
     }
 
     //////////////////////////sql -> JSON 연동////////////////////////////////////////
-    public void getData() {
+    void getData() {
         class GetDataJSON extends AsyncTask<String, Void, String> {
 
             @Override
@@ -295,7 +284,7 @@ public class F1_Dialog extends Dialog {
     }
 
     //////////////////////////JSON -> android 연동////////////////////////////////////////
-    public void showList(String myJSON) {
+    void showList(String myJSON) {
         final String TAG_RESULTS = "result";
         final String TAG_URL = "list";
         final String TAG_EXPIRE = "expire";
@@ -306,7 +295,7 @@ public class F1_Dialog extends Dialog {
             JSONArray jsonArray = jsonObj.getJSONArray(TAG_RESULTS);
             JSONObject c = jsonArray.getJSONObject(0);
 
-            String url = c.getString(TAG_URL);
+            url = c.getString(TAG_URL);
             location = c.getString(TAG_LOCATION);
             dayleft = c.getInt(TAG_EXPIRE);
 
@@ -344,7 +333,9 @@ public class F1_Dialog extends Dialog {
         gridArray.add(item_temp);
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
-
+        if(login_check) {
+            setData(image);
+        }
         dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
     }
     public static Bitmap createImage(int width, int height, int color) {
@@ -356,4 +347,57 @@ public class F1_Dialog extends Dialog {
         return bitmap;
     }
 
+    void setData(int image) {
+
+        class set_fridge extends AsyncTask<Void, Integer, Void> {
+            int img;
+            set_fridge(int par_img){
+                img = par_img;
+            }
+            @Override
+            protected Void doInBackground(Void... params) {
+                String param = "&u_id=" + login_id + "&u_location=" + location + "&u_imageUrl=" + String.valueOf(img)+ "&u_name=" + listname + "&u_year=" + String.valueOf(year) +
+                        "&u_month=" + String.valueOf(month) + "&u_day=" + String.valueOf(day) + "&u_del=" + "0";
+                try {
+                    URL url = new URL("http://13.124.64.178/set_fridge.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    //is = conn.getErrorStream();
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+                    String line = null;
+                    StringBuffer buff = new StringBuffer();
+                    while ( ( line = in.readLine() ) != null )
+                    {
+                        buff.append(line + "\n");
+                    }
+                    data = buff.toString().trim();
+                    Log.e("RECV DATA",data);
+
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                    return null;
+            }
+        }
+        set_fridge g = new set_fridge(image);
+        g.execute();
+    }
 }
