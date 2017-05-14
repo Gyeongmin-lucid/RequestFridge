@@ -8,8 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by kgm13 on 2017-05-12.
  */
 
-public class info_cuisine_DBManger extends SQLiteOpenHelper {
-    public info_cuisine_DBManger(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+public class info_cuisine_DBManager extends SQLiteOpenHelper {
+    public info_cuisine_DBManager(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 

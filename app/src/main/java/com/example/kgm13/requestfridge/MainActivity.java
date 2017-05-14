@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -31,11 +30,6 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,10 +62,12 @@ public class MainActivity extends AppCompatActivity
     //viewpiger 변수
     boolean f1 = true;                              //fridge에 대한 페이저 view on,off 확인
     boolean f2 = false;                             //list에 대한 페이저 view on,off 확인
-    info_cuisine_DBManger cuisine_dbManager;
-    SQLiteDatabase db;
+
     public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +75,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
-
-        cuisine_dbManager = new info_cuisine_DBManger(getApplicationContext(), "info_cuisine.db", null, 1);
 
         SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
         login_check = term.getBoolean("login_check", false);
@@ -213,7 +207,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         hideItem();
-        info_cuisine_sqlite();
+        //info_recipe_sqlite();
     }
 
 
@@ -383,7 +377,8 @@ public class MainActivity extends AppCompatActivity
         final F2_Dialog dialog = new F2_Dialog(f2_view.getContext());
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
-            public void onShow(DialogInterface dia) {
+            public void onShow(DialogInterface dialog) {
+
             }
         });
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -395,36 +390,6 @@ public class MainActivity extends AppCompatActivity
         dialog.show();
     }
 
-    ////내부 디비 작업
-    void info_cuisine_sqlite(){
-        InputStream is = null;
-        try {
-            is = getAssets().open("info_cuisine.csv");
-            BufferedReader buffer = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            String line = "";
-            String tableName ="info_cuisine";
-            String columns = "'recipe_code', 'cuisine', 'introduce', 'image_URL'";
-            String str1 = "INSERT INTO " + tableName + " (" + columns + ") values(";
-            String str2 = ");";
-            db = cuisine_dbManager.getWritableDatabase();
-            db.beginTransaction();
-            while ((line = buffer.readLine()) != null) {
-                StringBuilder sb = new StringBuilder(str1);
-                String[] str = line.split(",");
-                sb.append("'" + str[0] + "',");
-                sb.append("'" + str[1] + "',");
-                sb.append("'" + str[2] + "',");
-                sb.append("'" + str[3] + "'");
-                sb.append(str2);
-                db.execSQL(sb.toString());
-            }
-            db.setTransactionSuccessful();
-
-            db.endTransaction();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 
 }

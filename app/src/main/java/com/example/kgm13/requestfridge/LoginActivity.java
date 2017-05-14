@@ -2,6 +2,7 @@ package com.example.kgm13.requestfridge;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -35,6 +36,9 @@ import java.net.URL;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
 
 /**
  * Created by KYS on 2017-04-06.
@@ -53,12 +57,30 @@ public class LoginActivity extends AppCompatActivity {
 
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
+    //xls -> db과정에서 쓰이는 변수(추천디비에서 쓰임!)
+    info_cuisine_DBManager cuisine_dbManager;
+    info_ingredient_DBManager ingredient_dbManager;
+    info_stage_DBManager stage_dbManager;
+    Sheet sheet;
+    Cell cell;
+    int colnum;
+    int it = 1;
+    String[] rowdata;
+    String db_string;
+    dbstart makeDB;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
+
+        cuisine_dbManager = new info_cuisine_DBManager(getApplicationContext(), "info_cuisine.db", null, 1);
+        ingredient_dbManager = new info_ingredient_DBManager(getApplicationContext(), "info_ingredient.db", null, 1);
+        stage_dbManager = new info_stage_DBManager(getApplicationContext(), "info_stage.db", null, 1);
+
+        makeDB = new dbstart();
+        makeDB.execute();
 
         UserManagement.requestLogout(new LogoutResponseCallback() {
             @Override
@@ -223,5 +245,92 @@ public class LoginActivity extends AppCompatActivity {
             toast.show();
         }
 
+    }
+
+    ////내부 디비 작업
+    class dbstart extends AsyncTask<Void, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            info_recipe_sqlite();
+            return null;
+        }
+    }
+
+
+    void info_recipe_sqlite() {
+
+        try {
+            AssetManager am = getAssets();
+            InputStream is = am.open("info_recipe.xls");
+            Workbook wb = Workbook.getWorkbook(is);
+            for (int sheet_num = 0; sheet_num < 3; sheet_num++, it = 1) {
+                sheet = wb.getSheet(sheet_num);
+                System.out.println("=================씹지마셈33!!" + "\n");
+                initList(sheet_num);
+                System.out.println("=================씹지마셈44!!" + "\n");
+            }
+
+        } catch (Exception e) {
+            System.out.println("============== 씹힘 : " + e + "\n");
+        }
+
+    }
+
+    void initList(int sheet_num) {
+
+        switch(sheet_num){
+            //insertDB(num) : num -> db의 열의 개수, ex) 4 : 'code, cuisine, introduce, image_URL'
+            //                                          2 : 'code, list_korean'
+            case 0:
+                colnum = 4;
+                insertDB(colnum, "info_cuisine");
+                System.out.println("====================종료1" + "\n");
+                return;
+            case 1:
+                colnum = 2;
+                insertDB(colnum, "info_ingredient");
+                return;
+            case 2:
+                colnum  = 3;
+                insertDB(colnum, "info_stage");
+            default:
+
+        }
+
+    }
+
+    void insertDB(int colnum, String info){
+        do{
+            rowdata = getrowdata(it++);
+            if(!rowdata[0].equals(" ")){
+                db_string = "INSERT INTO " + info + " VALUES ('";
+                for(int i = 0; i < colnum-1; i++) {
+                    db_string += rowdata[i] + "', '";
+                }
+                db_string += rowdata[colnum-1] + "')";
+
+                if(colnum == 2) {
+                    ingredient_dbManager.insert(db_string);
+                }
+                if(colnum == 3){
+                    stage_dbManager.insert(db_string);
+                }
+                if(colnum == 4) {
+                    cuisine_dbManager.insert(db_string);
+                }
+            }
+            else{
+                return;
+            }
+        }while(!rowdata[0].equals(" "));
+    }
+    String[] getrowdata(int row) {
+        String[] data = new String[colnum];
+        for (int i = 0; i < colnum; i++) {
+            cell = sheet.getCell(i, row);
+            data[i] = String.valueOf(cell.getContents());
+        }
+        return data;
     }
 }
