@@ -135,6 +135,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(UserProfile userProfile) {
+                    String kakaoID = String.valueOf(userProfile.getId());
+                    Log.e("kakaoID", kakaoID);
                     Log.e("UserProfile", userProfile.toString());
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
