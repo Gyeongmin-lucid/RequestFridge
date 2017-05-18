@@ -297,6 +297,7 @@ public class OCRActivity extends AppCompatActivity {
                 }
                 builder.append(label.getDescription());
                 builder.append("\n");
+                Log.i("YSTest : ", label.getDescription());
                 //TODO: Draw rectangles later
                 break;
             }
