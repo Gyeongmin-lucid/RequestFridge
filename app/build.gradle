@@ -41,5 +41,6 @@ dependencies {
     compile 'com.google.api-client:google-api-client-android:1.22.0' exclude module: 'httpclient'
     compile 'com.google.http-client:google-http-client-gson:1.22.0' exclude module: 'httpclient'
     compile 'com.google.apis:google-api-services-vision:v1-rev30-1.22.0'
+    compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:+'
     compile files('libs/jxl.jar')
 }

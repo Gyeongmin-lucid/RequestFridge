@@ -3,6 +3,8 @@ package com.example.kgm13.requestfridge;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -68,6 +71,17 @@ public class LoginActivity extends AppCompatActivity {
     String[] rowdata;
     String db_string;
     dbstart makeDB;
+
+    //내부 db생성 변수들
+    //DataBaseHelper mDbHelper;
+    //TestAdapter mDbHelper;
+    Cursor cursor_i,cursor_c, cursor_s;
+    DatabaseRead info_i, info_c, info_s;
+    SQLiteDatabase DB_i, DB_c, DB_s;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,12 +89,15 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        cuisine_dbManager = new info_cuisine_DBManager(getApplicationContext(), "info_cuisine.db", null, 1);
-        ingredient_dbManager = new info_ingredient_DBManager(getApplicationContext(), "info_ingredient.db", null, 1);
-        stage_dbManager = new info_stage_DBManager(getApplicationContext(), "info_stage.db", null, 1);
+        cuisine_dbManager = new info_cuisine_DBManager(getApplicationContext(), "databases/info_cuisine.db", null, 1);
+        ingredient_dbManager = new info_ingredient_DBManager(getApplicationContext(), "databases/info_ingredient.db", null, 1);
+        stage_dbManager = new info_stage_DBManager(getApplicationContext(), "databases/info_stage.db", null, 1);
 
-        makeDB = new dbstart();
-        makeDB.execute();
+        //사용예제 : return 값을 이용해서 사용하세욤!!
+        get_ingredient("계란");
+        get_cuisine(17,1);
+        get_stage(17);
+
 
         UserManagement.requestLogout(new LogoutResponseCallback() {
             @Override
@@ -247,7 +264,85 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    ////내부 디비 작업
+    void setDBoption(){
+        info_c = new DatabaseRead(this, "info_cuisine.db");
+        info_i = new DatabaseRead(this, "info_ingredient.db");
+        info_s = new DatabaseRead(this, "info_stage.db");
+
+        DB_c = info_c.getReadableDatabase();
+        DB_i = info_i.getReadableDatabase();
+        DB_s = info_s.getReadableDatabase();
+
+    }
+    void closeDBoption(){
+        DB_c.close();
+        DB_i.close();
+        DB_s.close();
+    }
+
+    //사용법 : 레시피 번호와, 해당 출력하고싶은 col 번호를 넣으면, 그에 맞는 string 출력
+    //출력하고자 하는 내용이 요리명 : 1, 설명 : 2, image주소 : 3으로 col_num에 입력
+    public String get_cuisine(int recipeCode_num, int col_num) {
+        setDBoption();
+        String result = "";
+        cursor_c = DB_c.rawQuery("select * from info_cuisine where recipe_code = " + recipeCode_num + "", null);
+        if (cursor_c.getCount() != 0 && cursor_c != null) {
+            if (cursor_c.moveToFirst()) {
+                result = cursor_c.getString(col_num);
+                Log.v("cuisine success", result);
+            }
+        } else {
+            Log.w("cuisine error", "code_num with matching col_string not found.");
+        }
+        cursor_c.close();
+        closeDBoption();
+        return result;
+    }
+
+    //사용법 : list에 해당하는 이름을 parameter로 넣으면, 레시피 번호가 array형태로 리턴. 번호를 차례대로 쓰면됨!!, 초기화 0으로 했으니 마지막은 0으로 체킹
+    public int[] get_ingredient(String listname){
+        setDBoption();
+        int[] result = new int[100];
+        Arrays.fill(result, 0);
+        int i = 0;
+        cursor_i = DB_i.rawQuery("select * from info_ingredient where list_korean = '"+ listname +"'",null);
+        if (cursor_i.getCount() != 0 && cursor_i!=null) {
+            if (cursor_i.moveToFirst()) {
+                do {
+                    result[i++] = cursor_i.getInt(0);
+                    Log.v("ingredient success", String.valueOf(result[i-1]));
+                } while (cursor_i.moveToNext());
+            }
+        }
+        else{
+            Log.w("ingredient error", "listname with matching numbers not found.");
+        }
+        cursor_i.close();
+        closeDBoption();
+        return result;
+    }
+    // 사용법 : 레시피 번호를 넣으면 그에 맞는 요리 순서대로 string[]형태가 return
+    public String[] get_stage(int recipeCode_num){
+        setDBoption();
+        String[] result = new String[10];
+        Arrays.fill(result, "");
+        cursor_s = DB_s.rawQuery("select * from info_stage where recipe_code = " + recipeCode_num + "", null);
+        if (cursor_s.getCount() != 0 && cursor_s != null) {
+            if (cursor_s.moveToFirst()) {
+                do{
+                    result[cursor_s.getInt(1)-1] = cursor_s.getString(2);
+                    Log.v("stage success", result[cursor_s.getInt(1)-1]);
+                } while (cursor_s.moveToNext());
+            }
+        } else {
+            Log.w("stage error", "code_num with matching recipe not found.");
+        }
+        cursor_s.close();
+        closeDBoption();
+        return result;
+    }
+
+    ///////////////////////////////내부 디비 작업
     class dbstart extends AsyncTask<Void, Integer, Void> {
 
         @Override
@@ -266,13 +361,10 @@ public class LoginActivity extends AppCompatActivity {
             Workbook wb = Workbook.getWorkbook(is);
             for (int sheet_num = 0; sheet_num < 3; sheet_num++, it = 1) {
                 sheet = wb.getSheet(sheet_num);
-                System.out.println("=================씹지마셈33!!" + "\n");
                 initList(sheet_num);
-                System.out.println("=================씹지마셈44!!" + "\n");
             }
 
         } catch (Exception e) {
-            System.out.println("============== 씹힘 : " + e + "\n");
         }
 
     }
@@ -285,7 +377,6 @@ public class LoginActivity extends AppCompatActivity {
             case 0:
                 colnum = 4;
                 insertDB(colnum, "info_cuisine");
-                System.out.println("====================종료1" + "\n");
                 return;
             case 1:
                 colnum = 2;
@@ -333,4 +424,6 @@ public class LoginActivity extends AppCompatActivity {
         }
         return data;
     }
+
+
 }
