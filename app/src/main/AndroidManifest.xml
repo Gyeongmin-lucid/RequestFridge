@@ -48,7 +48,8 @@
             android:value="@string/kakao_app_key" />
 
         <activity android:name=".Login_Sign_up" />
-        <activity android:name=".Share_dialog"></activity>
+        <activity android:name=".Dialog_share" />
+        <activity android:name=".Dialog_Shareconfirm"></activity>
     </application>
 
 </manifest>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -31,6 +32,14 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +65,7 @@ public class MainActivity extends AppCompatActivity
 
     //navigation 변수
     NavigationView navigationView;
+    Menu nav_Menu;
 
     //spinner 내부
     private String[] NavSortItem = { "유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
@@ -77,6 +87,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        nav_Menu = navigationView.getMenu();
 
         SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
         login_check = term.getBoolean("login_check", false);
@@ -208,6 +221,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
+
         hideItem();
     }
 
@@ -250,22 +264,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
-        if (id == R.id.share){
-            Share_dialog dialog = new Share_dialog(context_final);
 
-            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dia) {
-                }
-            });
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dia) {
-                }
-            });
-
-            dialog.show();
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -289,6 +288,27 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
             finish();
         }
+        if (id == R.id.login){
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        if (id == R.id.share){
+            Dialog_share dialog = new Dialog_share(context_final);
+
+            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dia) {
+                }
+            });
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dia) {
+                }
+            });
+
+            dialog.show();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -297,13 +317,13 @@ public class MainActivity extends AppCompatActivity
 
     private void hideItem()
     {
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        Menu nav_Menu = navigationView.getMenu();
         if(login_check){
             nav_Menu.findItem(R.id.login).setVisible(false);
+            getShare();
         }
         else{
             nav_Menu.findItem(R.id.logout).setVisible(false);
+            nav_Menu.findItem(R.id.share).setVisible(false);
         }
     }
 
@@ -406,5 +426,79 @@ public class MainActivity extends AppCompatActivity
 
         dialog.show();
     }
+
+    /////////////////////sql code /////////////////////////
+    //////////////////////////sql -> JSON 연동////////////////////////////////////////
+    void getShare() {
+        class GetDataJSON extends AsyncTask<String, Void, String> {
+
+            @Override
+            protected String doInBackground(String... params) {
+                String param = "&u_id=" + login_id;
+                try {
+                    URL url = new URL("http://13.124.64.178/share_confirm.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    //is = conn.getErrorStream();
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+
+                    String json;
+                    StringBuilder sb = new StringBuilder();
+                    while ((json = in.readLine()) != null) {
+                        sb.append(json + "\n");
+                    }
+
+                    return sb.toString().trim();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                if(!result.equals("null")){
+                    final Dialog_Shareconfirm dialog = new Dialog_Shareconfirm(context_final, result);
+                    dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                        @Override
+                        public void onShow(DialogInterface dia) {
+                        }
+                    });
+                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dia) {
+                        }
+                    });
+
+                    dialog.show();
+                }
+            }
+        }
+        GetDataJSON g = new GetDataJSON();
+        g.execute();
+    }
+
+
+
 
 }

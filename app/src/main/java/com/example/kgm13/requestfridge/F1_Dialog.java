@@ -151,17 +151,14 @@ public class F1_Dialog extends Dialog {
                     db1_check = true;
                     dismiss();
                 }
-
-
             }
         });
-        f1_cancel.setOnTouchListener(new View.OnTouchListener()
 
+        f1_cancel.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onClick(View view) {
                 dismiss();
-                return false;
             }
         });
     }
