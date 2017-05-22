@@ -30,6 +30,7 @@ import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,9 +42,6 @@ import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
-import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
-import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
-import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CompoundButton.OnCheckedChangeListener {
@@ -53,12 +51,6 @@ public class MainActivity extends AppCompatActivity
     public static Context context_final;
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
-
-    //사용예제 : return 값을 이용해서 사용하세욤!!
-    int[] result1 = get_ingredient("계란");
-    String result2 = get_cuisine(17,1);
-    String[] result3 = get_stage(17);
-
 
 
 
@@ -217,7 +209,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
         hideItem();
-        //info_recipe_sqlite();
     }
 
 
@@ -258,6 +249,22 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
+        }
+        if (id == R.id.share){
+            Share_dialog dialog = new Share_dialog(context_final);
+
+            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dia) {
+                }
+            });
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dia) {
+                }
+            });
+
+            dialog.show();
         }
 
         return super.onOptionsItemSelected(item);
