@@ -41,6 +41,9 @@ import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
+import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
+import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
+import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CompoundButton.OnCheckedChangeListener {
@@ -50,6 +53,14 @@ public class MainActivity extends AppCompatActivity
     public static Context context_final;
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
+
+    //사용예제 : return 값을 이용해서 사용하세욤!!
+    int[] result1 = get_ingredient("계란");
+    String result2 = get_cuisine(17,1);
+    String[] result3 = get_stage(17);
+
+
+
 
     //navigation 변수
     NavigationView navigationView;
@@ -64,6 +75,9 @@ public class MainActivity extends AppCompatActivity
 
     public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -203,6 +217,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         hideItem();
+        //info_recipe_sqlite();
     }
 
 
@@ -318,6 +333,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
+
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -371,7 +387,8 @@ public class MainActivity extends AppCompatActivity
         final F2_Dialog dialog = new F2_Dialog(f2_view.getContext());
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
-            public void onShow(DialogInterface dia) {
+            public void onShow(DialogInterface dialog) {
+
             }
         });
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {

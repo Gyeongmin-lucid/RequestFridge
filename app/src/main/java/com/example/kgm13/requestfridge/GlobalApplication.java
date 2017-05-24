@@ -2,6 +2,7 @@ package com.example.kgm13.requestfridge;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 
 import com.kakao.auth.KakaoSDK;
 
@@ -12,11 +13,12 @@ import com.kakao.auth.KakaoSDK;
 public class GlobalApplication extends Application {
     private static volatile GlobalApplication obj = null;
     private static volatile Activity currentActivity = null;
-
+    private static Context context;
     @Override
     public void onCreate() {
         super.onCreate();
         obj = this;
+        GlobalApplication.context = getApplicationContext();
         KakaoSDK.init(new KakaoSDKAdapter());
     }
 
@@ -30,5 +32,9 @@ public class GlobalApplication extends Application {
 
     public static void setCurrentActivity(Activity currentActivity) {
         GlobalApplication.currentActivity = currentActivity;
+    }
+
+    public static Context getAppContext() {
+        return GlobalApplication.context;
     }
 }

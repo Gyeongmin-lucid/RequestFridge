@@ -53,12 +53,23 @@ public class LoginActivity extends AppCompatActivity {
 
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
+    //xls -> db과정에서 쓰이는 변수(추천디비에서 쓰임!)
+    info_cuisine_DBManager cuisine_dbManager;
+    info_ingredient_DBManager ingredient_dbManager;
+    info_stage_DBManager stage_dbManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
+
+        cuisine_dbManager = new info_cuisine_DBManager(getApplicationContext(), "databases/info_cuisine.db", null, 1);
+        ingredient_dbManager = new info_ingredient_DBManager(getApplicationContext(), "databases/info_ingredient.db", null, 1);
+        stage_dbManager = new info_stage_DBManager(getApplicationContext(), "databases/info_stage.db", null, 1);
+
+
 
         UserManagement.requestLogout(new LogoutResponseCallback() {
             @Override
@@ -224,4 +235,6 @@ public class LoginActivity extends AppCompatActivity {
         }
 
     }
+
+
 }

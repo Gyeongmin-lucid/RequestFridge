@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
@@ -42,6 +42,7 @@ dependencies {
     compile 'com.google.api-client:google-api-client-android:1.22.0' exclude module: 'httpclient'
     compile 'com.google.http-client:google-http-client-gson:1.22.0' exclude module: 'httpclient'
     compile 'com.google.apis:google-api-services-vision:v1-rev30-1.22.0'
-    compile 'com.android.support:support-v4:25.0.1'
+    compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:+'
+    compile files('libs/jxl.jar')
 
 }
