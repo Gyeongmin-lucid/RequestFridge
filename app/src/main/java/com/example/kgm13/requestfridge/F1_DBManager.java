@@ -23,8 +23,8 @@ public class F1_DBManager extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // 새로운 테이블을 생성한다.
         // create table 테이블명 (컬럼명 타입 옵션); TEXT, INTEGER,
-        db.execSQL("CREATE TABLE FRIDGE( _id INTEGER PRIMARY KEY AUTOINCREMENT, location TEXT, image INTEGER, imagebitmap INTEGER, name TEXT," +
-                "    year INTEGER, month INTEGER, day INTEGER, del INTEGER);");
+                db.execSQL("CREATE TABLE FRIDGE( _id INTEGER PRIMARY KEY AUTOINCREMENT, location TEXT, image INTEGER, imagebitmap INTEGER, name TEXT," +
+                        "    year INTEGER, month INTEGER, day INTEGER, del INTEGER);");
     }
 
     @Override
