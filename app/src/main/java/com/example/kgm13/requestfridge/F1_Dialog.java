@@ -46,6 +46,7 @@ import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
 import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
+import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
 
 /**
  * Created by kgm13 on 2017-04-09.
@@ -273,6 +274,7 @@ public class F1_Dialog extends Dialog {
             @Override
             protected void onPostExecute(String result) {
                 String myJSON = result;
+                System.out.println("==========result : " + result);
                 showList(myJSON);
             }
         }

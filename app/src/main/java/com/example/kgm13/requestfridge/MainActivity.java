@@ -47,7 +47,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 import static com.example.kgm13.requestfridge.F1_Dialog.db1_check;
+import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
 import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
@@ -284,6 +287,8 @@ public class MainActivity extends AppCompatActivity
             editor.putBoolean("login_check", false);
             editor.commit();
 
+            gridArray.clear();
+            gridView.setAdapter(customGridAdapter);
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();

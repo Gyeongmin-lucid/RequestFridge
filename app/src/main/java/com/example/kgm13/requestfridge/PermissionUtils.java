@@ -7,6 +7,8 @@ package com.example.kgm13.requestfridge;
 
 import android.app.Activity;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
@@ -48,5 +50,12 @@ public class PermissionUtils {
             }
         }
         return false;
+    }
+
+    public static boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) GlobalApplication.getAppContext().getSystemService(GlobalApplication.getAppContext().CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }
