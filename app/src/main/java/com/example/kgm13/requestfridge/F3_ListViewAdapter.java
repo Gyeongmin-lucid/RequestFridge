@@ -57,7 +57,8 @@ public class F3_ListViewAdapter extends ArrayAdapter<RecipeInfo> {
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context1,position + "번째가 클릭되었습니다.", Toast.LENGTH_LONG).show();
+                int astring = getItem(position).getNum();
+                Toast.makeText(context1,astring + "이 선택되었습니다.", Toast.LENGTH_LONG).show();
             }
         });
         // Return the completed view to render on screen

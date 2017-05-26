@@ -3,8 +3,9 @@
     package="com.example.kgm13.requestfridge">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:name=".GlobalApplication"
@@ -16,7 +17,7 @@
         <activity
             android:name=".MainActivity"
             android:label=" "
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +28,7 @@
         <activity
             android:name=".OCRActivity"
             android:label=" "
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".F1_Fridge" />
         <activity android:name=".F2_List" />
         <activity android:name=".F3_Recipe" />
@@ -47,7 +48,23 @@
             android:name="com.kakao.sdk.AppKey"
             android:value="@string/kakao_app_key" />
 
-        <activity android:name=".Login_Sign_up"></activity>
+        <activity android:name=".Login_Sign_up" />
+        <activity android:name=".Dialog_share" />
+        <activity android:name=".Dialog_Shareconfirm"></activity>
+
+        <service android:name=".FirebaseMessagingReceive" />
     </application>
+
+    <service android:name=".FirebaseInstanceIDService">
+        <intent-filter>
+            <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+        </intent-filter>
+    </service>
+    <service android:name=".FirebaseMessagingService">
+        <intent-filter>
+            <action android:name="com.google.firebase.MESSAGING_EVENT" />
+        </intent-filter>
+    </service>
+
 
 </manifest>

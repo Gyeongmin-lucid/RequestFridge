@@ -17,4 +17,6 @@ public class DatabaseRead extends SQLiteAssetHelper {
         super(context, par_DATABASE_NAME, null, DATABASE_VERSION);
         par_DATABASE_NAME = DATABASE_NAME;
     }
+
+
 }
