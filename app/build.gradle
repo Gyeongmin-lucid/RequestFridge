@@ -37,7 +37,7 @@ dependencies {
     compile 'com.google.http-client:google-http-client-gson:1.22.0' exclude module: 'httpclient'
     compile files('libs/jxl.jar')
 
-    compile 'com.jakewharton:butterknife:7.0.1'
+
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.android.support:appcompat-v7:25.0.1'
     compile 'com.android.support:design:25.0.1'
@@ -45,5 +45,11 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.google.apis:google-api-services-vision:v1-rev30-1.22.0'
     compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:+'
+    compile 'com.google.firebase:firebase-core:9.6.0'
+    compile 'com.google.firebase:firebase-messaging:9.6.0'
+    compile 'com.squareup.okhttp3:okhttp:3.2.0'
+
     testCompile 'junit:junit:4.12'
+    compile 'junit:junit:4.12'
 }
+apply plugin: 'com.google.gms.google-services'

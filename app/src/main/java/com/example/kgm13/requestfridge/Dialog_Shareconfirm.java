@@ -12,6 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,6 +28,9 @@ import java.net.URL;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 
 public class Dialog_Shareconfirm extends Dialog {
@@ -58,6 +65,10 @@ public class Dialog_Shareconfirm extends Dialog {
             public void onClick(View view) {
                 result = "accept";
                 share_result();
+                gridArray.clear();
+                F1_Fridge f1_fridge = new F1_Fridge();
+                f1_fridge.SQLgetdata();
+                gridView.setAdapter(customGridAdapter);
                 dismiss();
             }
         });
@@ -111,4 +122,5 @@ public class Dialog_Shareconfirm extends Dialog {
         GetDataJSON g = new GetDataJSON();
         g.execute();
     }
+
 }

@@ -21,6 +21,9 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -227,7 +230,6 @@ public class F1_Dialog extends Dialog {
     //////////////////////////sql -> JSON 연동////////////////////////////////////////
     void getData() {
         class GetDataJSON extends AsyncTask<String, Void, String> {
-
             @Override
             protected String doInBackground(String... params) {
                 String param = "&u_name=" + listname;
@@ -284,12 +286,15 @@ public class F1_Dialog extends Dialog {
 
     //////////////////////////JSON -> android 연동////////////////////////////////////////
     void showList(String myJSON) {
+
         final String TAG_RESULTS = "result";
         final String TAG_URL = "list";
         final String TAG_EXPIRE = "expire";
         final String TAG_LOCATION = "location";
-
         try {
+            if(myJSON.equals("null")){
+                throw new Exception ("오류발생!");
+            }
             JSONObject jsonObj = new JSONObject(myJSON);
             JSONArray jsonArray = jsonObj.getJSONArray(TAG_RESULTS);
             JSONObject c = jsonArray.getJSONObject(0);
@@ -304,15 +309,18 @@ public class F1_Dialog extends Dialog {
             year = date.get(Calendar.YEAR);
             month = date.get(Calendar.MONTH);
             day = date.get(Calendar.DAY_OF_MONTH);
-
             String resName = "@drawable/" + url;
             int image = getContext().getResources().getIdentifier(resName, "drawable", PACKAGE_NAME);
             setImageToSQLite(image);
 
-        } catch (JSONException e) {
+        }
+        catch (JSONException e) {
             int image = imagechoose(listname);
             setImageToSQLite(image);
-
+        }
+        catch (Exception t) {
+            int image = imagechoose(listname);
+            setImageToSQLite(image);
         }
     }
 
@@ -332,10 +340,11 @@ public class F1_Dialog extends Dialog {
         gridArray.add(item_temp);
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
-        if(login_check) {
+        if(login_check)
             setData(image);
-        }
-        dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
+        else
+            dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
+
     }
     public static Bitmap createImage(int width, int height, int color) {
         Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -348,13 +357,14 @@ public class F1_Dialog extends Dialog {
 
     void setData(int image) {
 
-        class set_fridge extends AsyncTask<Void, Integer, Void> {
+        class set_fridge extends AsyncTask<String, Void, String> {
             int img;
             set_fridge(int par_img){
                 img = par_img;
             }
+
             @Override
-            protected Void doInBackground(Void... params) {
+            protected String doInBackground(String... strings) {
                 String param = "&u_id=" + login_id + "&u_location=" + location + "&u_imageUrl=" + String.valueOf(img)+ "&u_name=" + listname + "&u_year=" + String.valueOf(year) +
                         "&u_month=" + String.valueOf(month) + "&u_day=" + String.valueOf(day) + "&u_del=" + "0";
                 try {
@@ -388,12 +398,13 @@ public class F1_Dialog extends Dialog {
                     data = buff.toString().trim();
                     Log.e("RECV DATA",data);
 
+
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                    return null;
+                return null;
             }
         }
         set_fridge g = new set_fridge(image);

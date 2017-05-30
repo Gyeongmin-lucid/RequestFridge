@@ -27,7 +27,12 @@ import java.net.URL;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
+import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
+import static com.example.kgm13.requestfridge.MainActivity.*;
 
 public class Dialog_share extends Dialog {
 
@@ -68,7 +73,7 @@ public class Dialog_share extends Dialog {
                 share_cancel_button = view;
                 share_ID = share_id.getText().toString();
                 if(login_id.equals(share_ID)){
-                    Snackbar.make(share_cancel_button, "공유하고 싶은 아이디를 입력해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    Snackbar.make(share_cancel_button, "본인 아이디는 공유할 필요가 없지않을까요?!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
                 else {
                     Share_confirmID();
@@ -137,6 +142,8 @@ public class Dialog_share extends Dialog {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dismiss();
                                 }
+
+
                             });
                     builder.create().show();
                 }

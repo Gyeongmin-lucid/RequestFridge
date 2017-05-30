@@ -21,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +55,7 @@ import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
+import static com.example.kgm13.requestfridge.LoginActivity.login_token;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CompoundButton.OnCheckedChangeListener {
@@ -64,7 +66,8 @@ public class MainActivity extends AppCompatActivity
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
 
-
+    //token 변수
+    boolean tokenout = false;
 
     //navigation 변수
     NavigationView navigationView;
@@ -98,6 +101,7 @@ public class MainActivity extends AppCompatActivity
         login_check = term.getBoolean("login_check", false);
         if(login_check){
             login_id = term.getString("ID", "");
+            login_token = term.getString("Token", "");
         }
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
@@ -280,11 +284,22 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_sort_spinner) {
         }
         if (id == R.id.logout){
+            tokenDelete(login_id);
+            while(!tokenout){
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             login_check = false;
+            login_id = "";
+            login_token = "";
             SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
             SharedPreferences.Editor editor = term.edit();
             editor.putString("ID", ""); //First라는 key값으로 infoFirst 데이터를 저장한다.
             editor.putBoolean("login_check", false);
+            editor.putString("Token", "");
             editor.commit();
 
             gridArray.clear();
@@ -364,8 +379,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -373,7 +386,6 @@ public class MainActivity extends AppCompatActivity
         public ViewPagerAdapter(FragmentManager manager) {
             super(manager);
         }
-
 
         @Override
         public Fragment getItem(int position) {
@@ -504,6 +516,54 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    public void tokenDelete(String id) {
+        class GetDataJSON extends AsyncTask<String, Void, String> {
 
+            @Override
+            protected String doInBackground(String... params) {
+                String param = "&u_id=" + login_id;
+                try {
+
+                    URL url = new URL("http://13.124.64.178/token_delete.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+                    tokenout = true;
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+
+                    String json;
+                    StringBuilder sb = new StringBuilder();
+                    while ((json = in.readLine()) != null) {
+                        sb.append(json + "\n");
+                    }
+
+                    return sb.toString().trim();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        }
+        GetDataJSON g = new GetDataJSON();
+        g.execute();
+    }
 
 }

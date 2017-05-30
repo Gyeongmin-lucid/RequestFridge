@@ -9,11 +9,16 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,6 +39,7 @@ import butterknife.ButterKnife;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.kgm13.requestfridge.F1_Dialog.createImage;
+import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
@@ -41,7 +47,7 @@ import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
 import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
 
 
-public class F1_Fridge extends Fragment {
+public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     public static View f1_view;         //frdige에 대한 view를 공유 (dialog와 같이)
 
     ////////////////////////////DB 변수////////////////////////////
@@ -55,6 +61,7 @@ public class F1_Fridge extends Fragment {
 
 
     ////////////////////////////gridview 변수////////////////////////////
+    SwipeRefreshLayout swipeRefreshLayout;
     static GridView gridView;           //gridview 선언
     static ArrayList<Item> gridArray = new ArrayList<Item>();       //gridview item을 선언
     static F1_GridViewAdapter customGridAdapter;              //girdview의 adapter를 통한 gridview로 엮어주는 역할
@@ -71,14 +78,19 @@ public class F1_Fridge extends Fragment {
         gridView = (GridView) f1_view.findViewById(R.id.grid);
         customGridAdapter = new F1_GridViewAdapter(getActivity(), R.layout.activity_f1_fridge_gridview, gridArray);
 
+
+        swipeRefreshLayout = (SwipeRefreshLayout) f1_view.findViewById(R.id.swipeRefresh);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
+        swipeRefreshLayout.setColorSchemeResources(R.color.yellow, R.color.red, R.color.Black, R.color.blue);
+
         FridgeDB_check = term.getBoolean("F1_db", false);
-        if(FridgeDB_check && !isOnline()) {
+        if(FridgeDB_check && !login_check) {
             try {
                 // 데이터베이스 객체를 얻어오는 다른 간단한 방법
                 //location을 저장을 하고 들고오지 않음 아직!!! 이거 수정해야함!!!!
                 db = manager.getReadableDatabase();
                 Cursor c = db.query("FRIDGE", null, null, null, null, null, null, null);
-                int item_num = 0;
                 gridArray.clear();
                 while (c.moveToNext()) { //db의 id를 하나씩 이동하면서 list를 추가합니다
                     int del = c.getInt(c.getColumnIndex("del"));
@@ -105,6 +117,7 @@ public class F1_Fridge extends Fragment {
             SQLgetdata();
             gridView.setAdapter(customGridAdapter);
         }
+
         return f1_view;
     }
 
@@ -128,7 +141,7 @@ public class F1_Fridge extends Fragment {
         }
     }
 
-    private int set_dayleft(int year, int month, int day){
+    public int set_dayleft(int year, int month, int day){
         long d, t, r;
 
         Calendar calendar =Calendar.getInstance();              //현재 날짜 불러옴
@@ -142,14 +155,16 @@ public class F1_Fridge extends Fragment {
         return (int)r;
     }
 
-    private Bitmap set_image(int image, int dayleft){
+    public Bitmap set_image(int image, int dayleft){
         Bitmap imagebitmap;
+        System.out.println("======image, dayleft : " + image + dayleft);
         if(image != 0){
-            imagebitmap = BitmapFactory.decodeResource(getContext().getResources(), image);
+            imagebitmap = BitmapFactory.decodeResource(f1_view.getContext().getResources(), image);
         }
         else{
             imagebitmap = createImage(300, 300, Color.parseColor("#E1FF36"));
         }
+        System.out.println("========imagebitmap : " + imagebitmap );
         imagebitmap = getCroppedBitmap(imagebitmap, imagebitmap.getHeight() / 2);
         imagebitmap = border(imagebitmap, dayleft);
 
@@ -206,7 +221,6 @@ public class F1_Fridge extends Fragment {
             @Override
             protected void onPostExecute(String result) {
                 String myJSON = result;
-                System.out.println("===================result : " + myJSON);
                 showList(myJSON);
             }
         }
@@ -230,7 +244,7 @@ public class F1_Fridge extends Fragment {
             JSONArray jsonArray = jsonObj.getJSONArray(TAG_RESULTS);
             for(int i = 0; i < jsonArray.length() ; i++) {
                 //순서 location, url, name, ytaer, month, day, del
-                System.out.println("=================error : " + i);
+                System.out.println("=================i : " + i);
                 JSONObject c = jsonArray.getJSONObject(i);
                 location = c.getString(TAG_location);
                 image = Integer.parseInt(c.getString(TAG_URL));
@@ -249,5 +263,19 @@ public class F1_Fridge extends Fragment {
         } catch (JSONException e) {
             System.out.println("error33");
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        swipeRefreshLayout.setRefreshing(true);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                gridArray.clear();
+                SQLgetdata();
+                gridView.setAdapter(customGridAdapter);
+                swipeRefreshLayout.setRefreshing(false);
+            }
+        },2000);
     }
 }
