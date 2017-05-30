@@ -565,5 +565,4 @@ public class MainActivity extends AppCompatActivity
         GetDataJSON g = new GetDataJSON();
         g.execute();
     }
-
 }
