@@ -62,6 +62,8 @@ public class OCRActivity extends AppCompatActivity {
     private long startTimeMS;
     private float uploadDurationSec;
 
+    static String ocrstring;
+
     @Override
     protected void onCreate(Bundle savedInstance) {
         super.onCreate(savedInstance);
@@ -298,6 +300,7 @@ public class OCRActivity extends AppCompatActivity {
                 builder.append(label.getDescription());
                 builder.append("\n");
                 Log.i("YSTest : ", label.getDescription());
+                ocrstring = label.getDescription();
                 //TODO: Draw rectangles later
                 break;
             }
