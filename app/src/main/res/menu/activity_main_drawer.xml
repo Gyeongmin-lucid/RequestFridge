@@ -32,4 +32,7 @@
     <item
         android:id="@+id/logout"
         android:title="로그아웃"></item>
+    <item
+        android:id="@+id/share"
+        android:title="다른 사람과 같이 써봐요"></item>
 </menu>

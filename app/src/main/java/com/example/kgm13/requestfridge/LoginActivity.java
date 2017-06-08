@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.kakao.auth.ErrorCode;
 import com.kakao.auth.ISessionCallback;
 import com.kakao.auth.Session;
@@ -23,6 +25,10 @@ import com.kakao.usermgmt.callback.MeResponseCallback;
 import com.kakao.usermgmt.response.model.UserProfile;
 import com.kakao.util.exception.KakaoException;
 import com.kakao.util.helper.log.Logger;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -47,11 +53,17 @@ public class LoginActivity extends AppCompatActivity {
     @Nullable @Bind(R.id.login_id)      EditText editlogid;
     @Nullable @Bind(R.id.login_pw)      EditText editlogpw;
 
-    public static String login_id, login_pw;
+    public static String login_id, login_token;
+    String login_pw;
     SessionCallback callback;
     public static boolean login_check = false;
 
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
+
+
+
+    //실시간 동기화 변수(Firebase)
+
 
     //xls -> db과정에서 쓰이는 변수(추천디비에서 쓰임!)
     info_cuisine_DBManager cuisine_dbManager;
@@ -64,6 +76,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
+
 
         cuisine_dbManager = new info_cuisine_DBManager(getApplicationContext(), "databases/info_cuisine.db", null, 1);
         ingredient_dbManager = new info_ingredient_DBManager(getApplicationContext(), "databases/info_ingredient.db", null, 1);
@@ -104,6 +117,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 login_id = editlogid.getText().toString();
                 login_pw = editlogpw.getText().toString();
+                login_token = FirebaseInstanceId.getInstance().getToken();
                 getsignin();
 
             }
@@ -113,6 +127,9 @@ public class LoginActivity extends AppCompatActivity {
         editlogpw.setBackgroundColor(Color.argb(80, 0, 0, 0));
         butsignin.setBackgroundColor(Color.argb(95, 0, 0, 0));
 
+
+        FirebaseMessaging.getInstance().subscribeToTopic("sharelist");
+        FirebaseInstanceId.getInstance().getToken();
     }
 
     @Override
@@ -167,7 +184,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             protected String doInBackground(String... params) {
-                String param = "&u_id=" + login_id + "&u_pw=" + login_pw;
+                String param = "&u_id=" + login_id + "&u_pw=" + login_pw + "&u_token=" + login_token;
                 try {
                     URL url = new URL("http://13.124.64.178/sign_in.php");
 
@@ -223,6 +240,7 @@ public class LoginActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = term.edit();
             editor.putString("ID", login_id); //First라는 key값으로 infoFirst 데이터를 저장한다.
             editor.putBoolean("login_check", true);
+            editor.putString("Token",login_token);
             editor.commit();
 
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -235,6 +253,5 @@ public class LoginActivity extends AppCompatActivity {
         }
 
     }
-
 
 }

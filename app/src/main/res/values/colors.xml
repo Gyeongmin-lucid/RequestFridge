@@ -12,5 +12,8 @@
     <color name="freeze">#5853EB</color>
     <color name="cold">#61DBF0</color>
     <color name="out">#E1FF36</color>
+    <color name="red">#FF0000</color>
+    <color name="yellow">#FFE400</color>
+    <color name="blue">#0054FF</color>
 
 </resources>
