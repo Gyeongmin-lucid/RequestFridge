@@ -33,12 +33,26 @@ import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.api.services.vision.v1.model.ImageContext;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+
+import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
 
 /**
  * Created by KYS on 2017-05-12.
@@ -69,8 +83,8 @@ public class OCRActivity extends AppCompatActivity {
         super.onCreate(savedInstance);
         setContentView(R.layout.ocr_view);
 
-        back_btn = (Button)findViewById(R.id.back);
-        add_btn = (Button)findViewById(R.id.add);
+        back_btn = (Button) findViewById(R.id.back);
+        add_btn = (Button) findViewById(R.id.add);
 
         back_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -228,7 +242,7 @@ public class OCRActivity extends AppCompatActivity {
                         }});
 
                         ImageContext imageContext = new ImageContext();
-                        String [] languages = { "ko" };
+                        String[] languages = {"ko"};
                         imageContext.setLanguageHints(Arrays.asList(languages));
                         annotateImageRequest.setImageContext(imageContext);
 
@@ -291,7 +305,7 @@ public class OCRActivity extends AppCompatActivity {
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         Log.i("JackTest", "total labels:" + labels.size());
         if (labels != null) {
-            for (int i = 0; i < labels.size(); i++ ) {
+            for (int i = 0; i < labels.size(); i++) {
                 EntityAnnotation label = labels.get(i);
                 if (i == 0) {
                     builder.append("Locale: ");
@@ -310,4 +324,8 @@ public class OCRActivity extends AppCompatActivity {
 
         return builder.toString();
     }
+
+
+
+
 }
