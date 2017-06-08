@@ -60,7 +60,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -76,14 +75,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 import static com.example.kgm13.requestfridge.F1_Dialog.db1_check;
-import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
 import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
-import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
-import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.LoginActivity.login_token;
+
 import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
 import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
 import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
@@ -109,7 +106,6 @@ public class MainActivity extends AppCompatActivity
 
     //navigation 변수
     NavigationView navigationView;
-    Menu nav_Menu;
 
     //spinner 내부
     private String[] NavSortItem = { "유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
@@ -141,14 +137,10 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        nav_Menu = navigationView.getMenu();
-
         SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
         login_check = term.getBoolean("login_check", false);
         if(login_check){
             login_id = term.getString("ID", "");
-            login_token = term.getString("Token", "");
         }
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
@@ -291,8 +283,8 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-
         hideItem();
+        //info_recipe_sqlite();
     }
 
 
@@ -335,7 +327,6 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
 
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -347,50 +338,16 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_sort_spinner) {
         }
         if (id == R.id.logout){
-            tokenDelete(login_id);
-            while(!tokenout){
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
             login_check = false;
-            login_id = "";
-            login_token = "";
             SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
             SharedPreferences.Editor editor = term.edit();
             editor.putString("ID", ""); //First라는 key값으로 infoFirst 데이터를 저장한다.
             editor.putBoolean("login_check", false);
-            editor.putString("Token", "");
             editor.commit();
 
-            gridArray.clear();
-            gridView.setAdapter(customGridAdapter);
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
-        }
-        if (id == R.id.login){
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        if (id == R.id.share){
-            Dialog_share dialog = new Dialog_share(context_final);
-
-            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-                @Override
-                public void onShow(DialogInterface dia) {
-                }
-            });
-            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dia) {
-                }
-            });
-
-            dialog.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -400,13 +357,13 @@ public class MainActivity extends AppCompatActivity
 
     private void hideItem()
     {
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        Menu nav_Menu = navigationView.getMenu();
         if(login_check){
             nav_Menu.findItem(R.id.login).setVisible(false);
-            getShare();
         }
         else{
             nav_Menu.findItem(R.id.logout).setVisible(false);
-            nav_Menu.findItem(R.id.share).setVisible(false);
         }
     }
 
@@ -442,6 +399,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+
+
     class ViewPagerAdapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -449,6 +408,7 @@ public class MainActivity extends AppCompatActivity
         public ViewPagerAdapter(FragmentManager manager) {
             super(manager);
         }
+
 
         @Override
         public Fragment getItem(int position) {
@@ -910,4 +870,5 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
+
 }
