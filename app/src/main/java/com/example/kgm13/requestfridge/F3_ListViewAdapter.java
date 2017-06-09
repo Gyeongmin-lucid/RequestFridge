@@ -1,12 +1,12 @@
 package com.example.kgm13.requestfridge;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -57,8 +57,13 @@ public class F3_ListViewAdapter extends ArrayAdapter<RecipeInfo> {
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                int astring = getItem(position).getNum();
-                Toast.makeText(context1,astring + "이 선택되었습니다.", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(context1, F3_Recipeview.class);
+                intent.putExtra("position", position);
+                intent.putExtra("name", getItem(position).getName());
+                intent.putExtra("info", getItem(position).getInfo());
+                context1.startActivity(intent);
+//                int astring = getItem(position).getNum();
+//                Toast.makeText(context1,getItem(position).getName() + "이 선택되었습니다.", Toast.LENGTH_LONG).show();
             }
         });
         // Return the completed view to render on screen
