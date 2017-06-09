@@ -30,12 +30,15 @@ import java.util.Date;
 
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
+import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
+import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
 
 public class F3_Recipe extends Fragment {
 
     F3_ListViewAdapter adapter1;
     View view;
     String[] expirelist = new String[101];
+    int[] recipelist = new int[500];
     int year, month, day;
     int t_year, t_month, t_day;
 
@@ -43,12 +46,33 @@ public class F3_Recipe extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_f3_recipe, container, false);
         ListView list = (ListView) view.findViewById(R.id.recipeListview);
-        final ArrayList<RecipeInfo> recipes = new ArrayList<RecipeInfo>();
+        ArrayList<RecipeInfo> recipes = new ArrayList<RecipeInfo>();
         recipes.add(new RecipeInfo("나물비빔밥", "육수로 지은 밥에 야채를 듬뿍 넣은 영양만점 나물비빔밥!", 1));
         recipes.add(new RecipeInfo("오곡밥", "정월대보름에 먹던 오곡밥! 영양을 한그릇에 담았습니다.",2));
+
+        expireList(7, 5);
+        int i =0;
+        int j=0;
+        while(get_ingredient("계란")[j]!= 0 && i <10){
+            recipelist[j] = get_ingredient("계란")[j];
+            recipes.add(new RecipeInfo(get_cuisine(recipelist[j],1),get_cuisine(recipelist[j],2),recipelist[j]));
+            i++;
+            j++;
+        }
+//        while(expirelist[i] != null){
+//            while(get_ingredient("계란")[j]!= 0){
+//                recipelist[i+j] = get_ingredient(expirelist[i])[j];
+//            }
+//        }
+        for(int k=0; k<10; k++){
+
+                recipes.add(new RecipeInfo(get_cuisine(recipelist[k],1),get_cuisine(recipelist[k],2),recipelist[k]));
+        }
+
+
+
         adapter1 = new F3_ListViewAdapter(recipes, this.getContext());
         list.setAdapter(adapter1);
-        expireList(7, 5);
 
         return view;
     }
