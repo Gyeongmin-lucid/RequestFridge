@@ -30,7 +30,7 @@ public class F3_ListViewAdapter extends ArrayAdapter<RecipeInfo> {
     }
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        RecipeInfo dataModel = getItem(position);
+        final RecipeInfo dataModel = getItem(position);
         ViewHolder viewHolder;
 
         final View result;
@@ -58,9 +58,7 @@ public class F3_ListViewAdapter extends ArrayAdapter<RecipeInfo> {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context1, F3_Recipeview.class);
-                intent.putExtra("position", position);
-                intent.putExtra("name", getItem(position).getName());
-                intent.putExtra("info", getItem(position).getInfo());
+                intent.putExtra("num", dataModel.getNum());
                 context1.startActivity(intent);
 //                int astring = getItem(position).getNum();
 //                Toast.makeText(context1,getItem(position).getName() + "이 선택되었습니다.", Toast.LENGTH_LONG).show();
