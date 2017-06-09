@@ -63,7 +63,7 @@ public class RecommandDB {
                 do {
                     result[i++] = cursor_i.getInt(0);
                     Log.v("ingredient success", String.valueOf(result[i-1]));
-                } while (cursor_i.moveToNext());
+                } while (cursor_i.moveToNext() && i <100);
             }
         }
         else{
