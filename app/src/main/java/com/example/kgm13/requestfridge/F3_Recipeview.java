@@ -14,6 +14,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
+import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
+
 /**
  * Created by G on 2017-06-09.
  */
@@ -25,16 +28,31 @@ public class F3_Recipeview extends Activity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_f3_recipeview);
+        String [] details = new String[10];
+        String todetails= "";
         image = (ImageView)findViewById(R.id.recipeimage);
         TextView name = (TextView)findViewById(R.id.recipename);
         TextView info = (TextView)findViewById(R.id.recipeinfo);
-
+        TextView detail = (TextView)findViewById(R.id.recipedetail);
         Intent intent = getIntent();
-        int a = intent.getIntExtra("position", 0);
-        name.setText(intent.getStringExtra("name"));
-        info.setText(intent.getStringExtra("info"));
-        new DownloadImageTask().execute("http://file.okdab.com/UserFiles/searching/recipe/005600.jpg");
-
+        int recipenum = intent.getIntExtra("num", 0);
+        if (recipenum == 0){
+            name.setText("error");
+        }
+        else {
+            name.setText(get_cuisine(recipenum, 1));
+            info.setText(get_cuisine(recipenum,2));
+            new DownloadImageTask().execute(get_cuisine(recipenum,3));
+            details = get_stage(recipenum);
+            for(int i =0; i<10;i++){
+                if(details[i] == null){
+                    break;
+                }
+                todetails += details[i];
+                todetails += "\n";
+            }
+            detail.setText(todetails);
+        }
 
     }
     private class DownloadImageTask extends AsyncTask<String, Integer, Bitmap> {

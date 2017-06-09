@@ -1,9 +1,7 @@
 package com.example.kgm13.requestfridge;
 
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 import android.widget.ListView;
 
 import org.json.JSONArray;
@@ -31,10 +28,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
-import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
 
 public class F3_Recipe extends Fragment {
 
@@ -49,8 +44,8 @@ public class F3_Recipe extends Fragment {
         view = inflater.inflate(R.layout.activity_f3_recipe, container, false);
         ListView list = (ListView) view.findViewById(R.id.recipeListview);
         final ArrayList<RecipeInfo> recipes = new ArrayList<RecipeInfo>();
-        recipes.add(new RecipeInfo("나물비빔밥", "육수로 지은 밥에 야채를 듬뿍 넣은 영양만점 나물비빔밥!"));
-        recipes.add(new RecipeInfo("오곡밥", "정월대보름에 먹던 오곡밥! 영양을 한그릇에 담았습니다."));
+        recipes.add(new RecipeInfo("나물비빔밥", "육수로 지은 밥에 야채를 듬뿍 넣은 영양만점 나물비빔밥!", 1));
+        recipes.add(new RecipeInfo("오곡밥", "정월대보름에 먹던 오곡밥! 영양을 한그릇에 담았습니다.",2));
         adapter1 = new F3_ListViewAdapter(recipes, this.getContext());
         list.setAdapter(adapter1);
         expireList(7, 5);
