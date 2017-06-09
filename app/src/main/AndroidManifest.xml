@@ -47,6 +47,7 @@
         <activity android:name=".Shopping" />
         <activity android:name=".TabPagerAdapter" />
         <activity android:name=".F2_listview" />
+        <activity android:name=".F3_Recipeview">
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
