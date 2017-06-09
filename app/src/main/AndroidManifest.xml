@@ -36,6 +36,7 @@
         <activity android:name=".F1_Fridge" />
         <activity android:name=".F2_List" />
         <activity android:name=".F3_Recipe" />
+        <activity android:name=".F3_Recipeview" />
         <activity android:name=".F1_DBManager" />
         <activity android:name=".F1_GridViewAdapter" />
         <activity android:name=".F1_Dialog" />
@@ -47,7 +48,6 @@
         <activity android:name=".Shopping" />
         <activity android:name=".TabPagerAdapter" />
         <activity android:name=".F2_listview" />
-        <activity android:name=".F3_Recipeview">
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"
