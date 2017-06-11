@@ -63,7 +63,7 @@ public class RecommandDB {
                 do {
                     result[i++] = cursor_i.getInt(0);
                     Log.v("ingredient success", String.valueOf(result[i-1]));
-                } while (cursor_i.moveToNext());
+                } while (cursor_i.moveToNext() && i <100);
             }
         }
         else{
@@ -82,7 +82,9 @@ public class RecommandDB {
         if (cursor_s.getCount() != 0 && cursor_s != null) {
             if (cursor_s.moveToFirst()) {
                 do{
-                    result[cursor_s.getInt(1)-1] = cursor_s.getString(2);
+                    result[cursor_s.getInt(1)-1] =  String.valueOf(cursor_s.getInt(1));
+                    result[cursor_s.getInt(1)-1] +=  ". ";
+                    result[cursor_s.getInt(1)-1] += cursor_s.getString(2);
                     Log.v("stage success", result[cursor_s.getInt(1)-1]);
                 } while (cursor_s.moveToNext());
             }

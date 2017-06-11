@@ -1,9 +1,7 @@
 package com.example.kgm13.requestfridge;
 
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -12,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.GridView;
 import android.widget.ListView;
 
 import org.json.JSONArray;
@@ -31,33 +28,87 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
-import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
+import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
+import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
 
 public class F3_Recipe extends Fragment {
 
     F3_ListViewAdapter adapter1;
     View view;
     String[] expirelist = new String[101];
+    int[][] recipelist = new int[2][100];
     int year, month, day;
     int t_year, t_month, t_day;
-
+    ArrayList<RecipeInfo> recipes = new ArrayList<RecipeInfo>();
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_f3_recipe, container, false);
         ListView list = (ListView) view.findViewById(R.id.recipeListview);
-        final ArrayList<RecipeInfo> recipes = new ArrayList<RecipeInfo>();
-        recipes.add(new RecipeInfo("나물비빔밥", "육수로 지은 밥에 야채를 듬뿍 넣은 영양만점 나물비빔밥!"));
-        recipes.add(new RecipeInfo("오곡밥", "정월대보름에 먹던 오곡밥! 영양을 한그릇에 담았습니다."));
+
+//        recipes.add(new RecipeInfo("나물비빔밥", "육수로 지은 밥에 야채를 듬뿍 넣은 영양만점 나물비빔밥!", 1));
+//        recipes.add(new RecipeInfo("오곡밥", "정월대보름에 먹던 오곡밥! 영양을 한그릇에 담았습니다.",2));
+
+        expireList(15, 5);
+
+        recipelist[0] = get_ingredient(expirelist[0]);
+        recipelist[1] = get_ingredient(expirelist[1]);
+
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 100; j++) {
+                if (recipelist[1][j] == recipelist[0][i]) {
+                    break;
+                }
+                if (j == 99) {
+                    recipelist[0][i] = 0;
+                }
+            }
+        }
+        Sort(recipelist);
+        for (int k = 0; k < 10; k++) {
+
+            recipes.add(new RecipeInfo(get_cuisine(recipelist[0][k], 1), get_cuisine(recipelist[0][k], 2), recipelist[0][k]));
+        }
+
         adapter1 = new F3_ListViewAdapter(recipes, this.getContext());
         list.setAdapter(adapter1);
-        expireList(7, 5);
 
         return view;
     }
 
+    private void Sort(int[][] recipelist) {
+        int [] tem = new int [100];
+//        int [][] tem = new int [1][1];
+//        for(int i = 0; i<100; i++){
+//            for(int j = i; j<100; j++){
+//                if(recipelist[i][1] < recipelist[j][1]){
+//                    tem[0] = recipelist[i];
+//                    recipelist[i] = recipelist[j];
+//                    recipelist[j] = tem[0];
+//                }
+//
+//            }
+//        }
+        for(int i =0; i<100; i++){
+            for(int j =0; j<100; j++){
+                if(recipelist[0][i] == recipelist[1][j]){
+                    break;
+                }
+                else if(j == 99){
+                    recipelist[0][i] = 0;
+                }
+            }
+        }
+        int k=0;
+        for (int i = 0; i<100; i++){
+            if(recipelist[0][i] != 0){
+                tem[k] = recipelist[0][i];
+                k++;
+            }
+        }
+        recipelist[0] = tem;
+    }
 
 
     private int set_dayleft(int year, int month, int day){
@@ -182,6 +233,7 @@ public class F3_Recipe extends Fragment {
                 list = c.getString(TAG_NAME);
                 expirelist[i] = list;
             }
+
             // expirelist를 쓰실거면 이부분 부터 이어서 사용해주세요!! 함수로 구현동작을 묶어서 함수 한개만 만 이 주석 부분에 놔두셔도 됩니다.
             // oncreate으로 돌아가서 expirelist 사용하는건 삼가해주세요!!(동작 방식으로 인해서 oncreate부에서 사용할시 값이 제대로 들어가지 않습니다.)
             // expirelist는 {a, b, c, d , null, null, null, .... ,null} 이런식으로 들어가게 됩니다.

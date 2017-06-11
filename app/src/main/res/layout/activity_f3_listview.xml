@@ -2,18 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textname"
-        android:layout_weight="1"
-        android:text="name"
-        android:textAlignment="center"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textinfo"
-        android:layout_weight="1"
-        android:text="name"
-        android:textAlignment="center"/>
+    <LinearLayout
+
+        android:layout_gravity="left"
+        android:padding="10dp"
+        android:orientation="vertical"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_weight="1">
+        <TextView
+            android:textStyle="bold"
+            android:textColor="@color/lighBlack"
+            android:textSize="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textname"
+            android:ellipsize = "end"
+            android:maxLines="2"
+            android:textAlignment="center"/>
+        <TextView
+            android:textColor="@color/lighBlack"
+            android:textSize="12dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textinfo"
+            android:ellipsize = "end"
+            android:maxLines="2"
+            android:textAlignment="center"/></LinearLayout>
 </LinearLayout>
