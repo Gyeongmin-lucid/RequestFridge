@@ -51,6 +51,11 @@ import com.google.api.services.vision.v1.model.EntityAnnotation;
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
 import com.google.api.services.vision.v1.model.ImageContext;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -69,21 +74,23 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 import static com.example.kgm13.requestfridge.F1_Dialog.db1_check;
+import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
 import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
+import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
+import static com.example.kgm13.requestfridge.LoginActivity.login_auto;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.LoginActivity.login_token;
 
-import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
-import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
-import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CompoundButton.OnCheckedChangeListener {
@@ -93,12 +100,11 @@ public class MainActivity extends AppCompatActivity
     public static Context context_final;
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
-
-    //사용예제 : return 값을 이용해서 사용하세욤!!
-    int[] result1 = get_ingredient("계란");
-    String result2 = get_cuisine(17,1);
-    String[] result3 = get_stage(17);
-
+    //실시간 db변수
+    public static String login_head = "";
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference databaseReference = firebaseDatabase.getReference();
+    //처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
     public static String[] ocrtemp = new String[200];
 
     //token 변수
@@ -106,10 +112,11 @@ public class MainActivity extends AppCompatActivity
 
     //navigation 변수
     NavigationView navigationView;
+    Menu nav_Menu;
 
     //spinner 내부
-    private String[] NavSortItem = { "유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
-    private String[] NavAlarmDateItem = {"1일", "2일","3일", "5일", "7일"};
+    private String[] NavSortItem = {"유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
+    private String[] NavAlarmDateItem = {"1일", "2일", "3일", "5일", "7일"};
 
     //viewpiger 변수
     boolean f1 = true;                              //fridge에 대한 페이저 view on,off 확인
@@ -128,8 +135,6 @@ public class MainActivity extends AppCompatActivity
     public static final int CAMERA_IMAGE_REQUEST = 3;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,10 +143,7 @@ public class MainActivity extends AppCompatActivity
         backPressCloseHandler = new BackPressCloseHandler(this);
 
         SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
-        login_check = term.getBoolean("login_check", false);
-        if(login_check){
-            login_id = term.getString("ID", "");
-        }
+
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
         context_final = this;
@@ -213,24 +215,25 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onPageSelected(int position) {
-                if(position == 0){
-                    f1 = true; f2 = false;
+                if (position == 0) {
+                    f1 = true;
+                    f2 = false;
                     fab.setVisibility(View.VISIBLE);
                 }
-                if(position == 1){
-                    f1 = false; f2 = true;
+                if (position == 1) {
+                    f1 = false;
+                    f2 = true;
                     fab.setVisibility(View.VISIBLE);
                 }
-                if(position == 2){
+                if (position == 2) {
                     fab.setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                if(state == 2)
+                if (state == 2)
                     fab.setVisibility(View.GONE);
-
             }
         });
 
@@ -247,7 +250,7 @@ public class MainActivity extends AppCompatActivity
         Menu menu1 = navigationView.getMenu();
         Menu menu2 = navigationView.getMenu();
         MenuItem alarmitem = menu2.findItem(R.id.alarm_switch);
-        SwitchCompat switchCompat = (SwitchCompat)alarmitem.getActionView().findViewById(R.id.switchcompat);
+        SwitchCompat switchCompat = (SwitchCompat) alarmitem.getActionView().findViewById(R.id.switchcompat);
         switchCompat.setOnCheckedChangeListener(this);
         sortspinner = (Spinner) menu1.findItem(R.id.nav_sort_spinner).getActionView();
         sortspinner.setAdapter(new ArrayAdapter<String>(
@@ -256,7 +259,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String a = NavSortItem[0];
-                if(!a.equals(sortspinner.getSelectedItem().toString())){
+                if (!a.equals(sortspinner.getSelectedItem().toString())) {
                     Toast.makeText(MainActivity.this, NavSortItem[position], Toast.LENGTH_SHORT).show();
                     a = NavSortItem[position];
                 }
@@ -265,14 +268,15 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
-            }});
+            }
+        });
         alarmspinner = (Spinner) menu2.findItem(R.id.nav_alarm_spinner).getActionView();
         alarmspinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmDateItem));
         alarmspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String a = NavAlarmDateItem[0];
-                if(!a.equals(alarmspinner.getSelectedItem().toString())){
+                if (!a.equals(alarmspinner.getSelectedItem().toString())) {
                     Toast.makeText(MainActivity.this, NavAlarmDateItem[position] + " 전 알람", Toast.LENGTH_SHORT).show();
                     a = NavAlarmDateItem[position];
                 }
@@ -284,20 +288,54 @@ public class MainActivity extends AppCompatActivity
             }
         });
         hideItem();
-        //info_recipe_sqlite();
+        if(login_head.equals("")) {
+            checkhead();
+        }
+        databaseReference.child("share").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                FirebaseDB firemessage = dataSnapshot.getValue(FirebaseDB.class);  // chatData를 가져오고
+                final String TAG_SENDTIME = "sendtime";
+                try {
+                    JSONObject c = new JSONObject(firemessage.getMessage());
+                    getShare();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                }
+            }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) { }
+        });
+
+
+
     }
-
-
 
 
     @Override
     protected void onStop() {
-        if(db1_check) {
-            SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
-            SharedPreferences.Editor editor = term.edit();
+        SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
+        SharedPreferences.Editor editor = term.edit();
+        if (db1_check)
             editor.putBoolean("F1_db", true); //First라는 key값으로 infoFirst 데이터를 저장한다.
-            editor.commit();
-        }
+
+        editor.putString("ID", login_id); //First라는 key값으로 infoFirst 데이터를 저장한다.
+        editor.putBoolean("login_check", login_check);
+        editor.putBoolean("login_auto", login_auto);
+        editor.putString("ID_head", login_head);
+        editor.putString("Token", login_token);
+        editor.commit();
         super.onStop();
     }
 
@@ -337,17 +375,55 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
         if (id == R.id.nav_sort_spinner) {
         }
-        if (id == R.id.logout){
+        if (id == R.id.logout) {
+            tokenDelete(login_id);
+            while (!tokenout) {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             login_check = false;
+            login_auto = false;
+            login_head = "";
+            login_id = "";
+            login_token = "";
             SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
             SharedPreferences.Editor editor = term.edit();
             editor.putString("ID", ""); //First라는 key값으로 infoFirst 데이터를 저장한다.
             editor.putBoolean("login_check", false);
+            editor.putBoolean("login_auto", false);
+            editor.putString("Token", "");
             editor.commit();
 
+            gridArray.clear();
+            gridView.setAdapter(customGridAdapter);
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(intent);
             finish();
+        }
+
+        if (id == R.id.login) {
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        if (id == R.id.share) {
+            Dialog_share dialog = new Dialog_share(context_final);
+
+            dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dia) {
+                }
+            });
+            dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dia) {
+                }
+            });
+
+            dialog.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -355,15 +431,15 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    private void hideItem()
-    {
+    private void hideItem() {
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         Menu nav_Menu = navigationView.getMenu();
-        if(login_check){
+        if (login_check) {
             nav_Menu.findItem(R.id.login).setVisible(false);
-        }
-        else{
+            getShare();
+        } else {
             nav_Menu.findItem(R.id.logout).setVisible(false);
+            nav_Menu.findItem(R.id.share).setVisible(false);
         }
     }
 
@@ -397,8 +473,6 @@ public class MainActivity extends AppCompatActivity
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
     }
-
-
 
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
@@ -583,7 +657,7 @@ public class MainActivity extends AppCompatActivity
                         }});
 
                         ImageContext imageContext = new ImageContext();
-                        String [] languages = { "ko" };
+                        String[] languages = {"ko"};
                         imageContext.setLanguageHints(Arrays.asList(languages));
                         annotateImageRequest.setImageContext(imageContext);
 
@@ -637,7 +711,7 @@ public class MainActivity extends AppCompatActivity
         List<EntityAnnotation> labels = response.getResponses().get(0).getTextAnnotations();
         Log.i("JackTest", "total labels:" + labels.size());
         if (labels != null) {
-            for (int i = 0; i < labels.size(); i++ ) {
+            for (int i = 0; i < labels.size(); i++) {
                 EntityAnnotation label = labels.get(i);
                 if (i == 0) {
                     builder.append("Locale: ");
@@ -723,7 +797,7 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             protected void onPostExecute(String result) {
-                if(!result.equals("null")){
+                if (!result.equals("null")) {
                     final Dialog_Shareconfirm dialog = new Dialog_Shareconfirm(context_final, result);
                     dialog.setOnShowListener(new DialogInterface.OnShowListener() {
                         @Override
@@ -798,6 +872,7 @@ public class MainActivity extends AppCompatActivity
     void getlist() {
         class GetDataJSON extends AsyncTask<String, Void, String> {
             String param = "";
+
             @Override
             protected String doInBackground(String... params) {
                 try {
@@ -842,7 +917,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onPostExecute(String result) {
                 String myJSON = result;
-                System.out.println("==========result : " + result);
                 setlist(myJSON);
             }
         }
@@ -859,16 +933,69 @@ public class MainActivity extends AppCompatActivity
         try {
             JSONObject jsonObj = new JSONObject(myJSON);
             JSONArray jsonArray = jsonObj.getJSONArray(TAG_RESULTS);
-            for(int i = 0; i < jsonArray.length() ; i++) {
+            for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject c = jsonArray.getJSONObject(i);
                 list = c.getString(TAG_LIST);
                 ocrtemp[i] = list;
             }
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
     }
+    ///////////////////////////head 확인/////////////////////////////////////////////////
+    void checkhead() {
+        class GetDataJSON extends AsyncTask<String, Void, String> {
+            @Override
+            protected String doInBackground(String... params) {
+                String param = "&u_id=" + login_id;
+                try {
+                    URL url = new URL("http://13.124.64.178/find_sharehead.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+
+                    String json;
+                    StringBuilder sb = new StringBuilder();
+                    while ((json = in.readLine()) != null) {
+                        sb.append(json + "\n");
+                    }
+
+                    return sb.toString().trim();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                login_head = result;
+            }
+        }
+        GetDataJSON g = new GetDataJSON();
+        g.execute();
+    }
+
 
 }
