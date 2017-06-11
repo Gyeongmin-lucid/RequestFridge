@@ -159,7 +159,7 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
                     dayleft = set_dayleft(year, month, day);
 
 
-                    if (timecheck<2500 && login_head.equals(head) && (!login_id.equals(send))) {
+                    if (timecheck<3000 && login_head.equals(head) && (!login_id.equals(send))) {
                         Toast.makeText(getContext(), send + "님이 " + name +"을 추가하셨습니다!", Toast.LENGTH_SHORT).show();
 
                         gridArray.add(new Item(set_image(image, dayleft), name, dayleft));

@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity
     public static String login_head = "";
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
-    //처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
+    public static int perform = 1;//처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
     public static String[] ocrtemp = new String[200];
 
     //token 변수
@@ -291,37 +291,44 @@ public class MainActivity extends AppCompatActivity
         if(login_head.equals("")) {
             checkhead();
         }
+
+
         databaseReference.child("share").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
                 FirebaseDB firemessage = dataSnapshot.getValue(FirebaseDB.class);  // chatData를 가져오고
                 final String TAG_SENDTIME = "sendtime";
                 try {
                     JSONObject c = new JSONObject(firemessage.getMessage());
-                    getShare();
+                    long timecheck = System.currentTimeMillis() - c.getLong(TAG_SENDTIME);
+                    if ((perform-- == 1) && (timecheck < 3000)) {
+                        getShare();
+                    }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (NullPointerException e) {
                 }
             }
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) { }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) { }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
-
-
-
     }
-
 
     @Override
     protected void onStop() {
@@ -809,7 +816,6 @@ public class MainActivity extends AppCompatActivity
                         public void onDismiss(DialogInterface dia) {
                         }
                     });
-
                     dialog.show();
                 }
             }
@@ -996,6 +1002,4 @@ public class MainActivity extends AppCompatActivity
         GetDataJSON g = new GetDataJSON();
         g.execute();
     }
-
-
 }
