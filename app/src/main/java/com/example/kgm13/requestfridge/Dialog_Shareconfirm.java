@@ -40,6 +40,7 @@ import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MainActivity.login_head;
+import static com.example.kgm13.requestfridge.MainActivity.perform;
 
 public class Dialog_Shareconfirm extends Dialog {
 
@@ -63,6 +64,7 @@ public class Dialog_Shareconfirm extends Dialog {
         shareconfirm_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                perform = 1;
                 result = "cancel";
                 share_result();
                 dismiss();
@@ -71,6 +73,7 @@ public class Dialog_Shareconfirm extends Dialog {
         shareconfirm_accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                perform = 1;
                 result = "accept";
                 login_head = id;
                 share_result();
