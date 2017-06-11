@@ -11,7 +11,7 @@
         android:id="@+id/login_id"
         android:layout_width="250dp"
         android:layout_height="50dp"
-        android:layout_marginTop="160dp"
+        android:layout_marginTop="100dp"
         android:layout_centerHorizontal="true"
         android:hint="@string/id_hint"
         android:textColorHint="@color/white"
@@ -40,13 +40,36 @@
         android:layout_below="@+id/login_pw"
         />
 
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:id="@+id/auto_signlayout"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_below="@+id/button_signin"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true"
+        >
+        <CheckBox
+            android:id="@+id/button_autosignin"
+            android:scaleX="1.30"
+            android:scaleY="1.30"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="자동 로그인하기"/>
+
+    </LinearLayout>
+
     <com.kakao.usermgmt.LoginButton
         android:id="@+id/button_kakao"
         android:layout_width="180dp"
         android:layout_height="50dp"
-        android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
-        android:layout_below="@+id/button_signin"
+        android:layout_below="@+id/auto_signlayout"
         />
 
 

@@ -15,6 +15,9 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,6 +38,8 @@ import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MainActivity.*;
 
 public class Dialog_share extends Dialog {
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
     @Nullable @Bind(R.id.share_cancel) Button share_cancel;
     @Nullable @Bind(R.id.share_cancel_top) Button share_cancel_top;
@@ -77,6 +82,8 @@ public class Dialog_share extends Dialog {
                 }
                 else {
                     Share_confirmID();
+                    FirebaseDB firemessage = new FirebaseDB(login_id, "share");  // 유저 이름과 메세지로 chatData 만들기
+                    databaseReference.child("share").push().setValue(firemessage);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 }
 
             }

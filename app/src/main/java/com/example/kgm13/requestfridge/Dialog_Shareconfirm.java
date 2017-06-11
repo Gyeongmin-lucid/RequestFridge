@@ -11,6 +11,13 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +39,7 @@ import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
+import static com.example.kgm13.requestfridge.MainActivity.login_head;
 
 public class Dialog_Shareconfirm extends Dialog {
 
@@ -64,6 +72,7 @@ public class Dialog_Shareconfirm extends Dialog {
             @Override
             public void onClick(View view) {
                 result = "accept";
+                login_head = id;
                 share_result();
                 gridArray.clear();
                 F1_Fridge f1_fridge = new F1_Fridge();
