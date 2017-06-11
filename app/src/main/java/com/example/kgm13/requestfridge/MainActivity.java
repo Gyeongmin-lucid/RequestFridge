@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity
     public static String login_head = "";
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
-
+    //처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
     public static String[] ocrtemp = new String[200];
 
     //token 변수
@@ -291,10 +291,19 @@ public class MainActivity extends AppCompatActivity
         if(login_head.equals("")) {
             checkhead();
         }
-        databaseReference.child("share").addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
+        databaseReference.child("share").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                getShare();
+                FirebaseDB firemessage = dataSnapshot.getValue(FirebaseDB.class);  // chatData를 가져오고
+                final String TAG_SENDTIME = "sendtime";
+                try {
+                    JSONObject c = new JSONObject(firemessage.getMessage());
+                    getShare();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                }
             }
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) { }
@@ -908,7 +917,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onPostExecute(String result) {
                 String myJSON = result;
-                System.out.println("==========result : " + result);
                 setlist(myJSON);
             }
         }

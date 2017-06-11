@@ -82,7 +82,9 @@ public class Dialog_share extends Dialog {
                 }
                 else {
                     Share_confirmID();
-                    FirebaseDB firemessage = new FirebaseDB(login_id, "share");  // 유저 이름과 메세지로 chatData 만들기
+                    String json = "{\"sendtime\" : \"" + String.valueOf(System.currentTimeMillis())
+                            + "\"}";
+                    FirebaseDB firemessage = new FirebaseDB(login_id, json);  // 유저 이름과 메세지로 chatData 만들기
                     databaseReference.child("share").push().setValue(firemessage);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 }
 
