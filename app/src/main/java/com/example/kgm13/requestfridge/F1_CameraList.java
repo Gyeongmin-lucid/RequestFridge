@@ -138,16 +138,19 @@ public class F1_CameraList extends Dialog {
         registButton.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                F1_Dialog dialog = new F1_Dialog(context);
+                F1_Dialog[] dialog = new F1_Dialog[strcam.size()];
+                for(int i = 0 ; i < strcam.size() ; i++){
+                    dialog[i] = new F1_Dialog(context);
+                }
                 for (int i = 0; i < strcam.size(); i++) {
-                    dialog.listname = strcam.get(i);
-                    Log.e("Camera", dialog.listname);
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    dialog.getData();
+                    dialog[i].listname = strcam.get(i);
+                    Log.e("Camera", dialog[i].listname);
+//                    try {
+//                        Thread.sleep(1000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+                    dialog[i].getData();
                 }
 
                 dismiss();

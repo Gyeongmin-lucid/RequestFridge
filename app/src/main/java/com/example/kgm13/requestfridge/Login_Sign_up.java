@@ -26,6 +26,7 @@ import java.net.URL;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.LoginActivity.login_token;
 
@@ -65,6 +66,7 @@ public class Login_Sign_up extends AppCompatActivity {
                         editor.putBoolean("login_check", true);
                         editor.putString("Token", login_token);
                         editor.commit();
+                        login_check = true;
 
                         Intent intent = new Intent(Login_Sign_up.this, MainActivity.class);
                         startActivity(intent);
