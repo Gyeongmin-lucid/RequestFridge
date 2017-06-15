@@ -58,7 +58,7 @@ import static com.example.kgm13.requestfridge.F1_CameraList.camera_check;
  */
 
 
-public class F1_Dialog extends Dialog {
+public class F1_CameraDialog extends Dialog {
     ////////////////////////////내부DB 변수////////////////////////////
     F1_DBManager dbManager;
     static boolean db1_check = false;
@@ -87,7 +87,7 @@ public class F1_Dialog extends Dialog {
     @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
 
-    public F1_Dialog(Context context) {
+    public F1_CameraDialog(Context context) {
         super(context);
     }
 
@@ -278,7 +278,6 @@ public class F1_Dialog extends Dialog {
             protected void onPostExecute(String result) {
                 String myJSON = result;
                 System.out.println("==========result : " + result);
-                Log.e("temp", listname);
                 showList(myJSON);
             }
         }
@@ -288,7 +287,7 @@ public class F1_Dialog extends Dialog {
 
     //////////////////////////JSON -> android 연동////////////////////////////////////////
     void showList(String myJSON) {
-        Log.e("temp", listname);
+
         final String TAG_RESULTS = "result";
         final String TAG_URL = "list";
         final String TAG_EXPIRE = "expire";
@@ -342,13 +341,12 @@ public class F1_Dialog extends Dialog {
         gridArray.add(item_temp);
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
-        if(login_check) {
-            Log.e("temp", listname);
+        if(login_check)
             setData(image);
-        }
         else {
             Log.e("DB", String.valueOf(image));
             Log.e("DB", listname);
+            camera_check = true;
             dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
 
         }

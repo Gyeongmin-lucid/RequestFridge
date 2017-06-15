@@ -1,5 +1,6 @@
 package com.example.kgm13.requestfridge;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -100,6 +101,7 @@ public class MainActivity extends AppCompatActivity
     String[] result3 = get_stage(17);
 
     public static String[] ocrtemp = new String[200];
+    public static ArrayList<String> strcam = new ArrayList<String>();
 
     //token 변수
     boolean tokenout = false;
@@ -164,14 +166,14 @@ public class MainActivity extends AppCompatActivity
                                 public void onClick(DialogInterface dialog, int which) {
                                     AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
                                     builder2
-                                            .setMessage(R.string.dialog_select_prompt)
-                                            .setPositiveButton(R.string.dialog_select_gallery, new DialogInterface.OnClickListener() {
+                                            .setMessage("사진을 선택해 주세요")
+                                            .setPositiveButton("갤러리", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     startGalleryChooser();
                                                 }
                                             })
-                                            .setNegativeButton(R.string.dialog_select_camera, new DialogInterface.OnClickListener() {
+                                            .setNegativeButton("카메라", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     startCamera();
@@ -546,6 +548,17 @@ public class MainActivity extends AppCompatActivity
 
         // Do the real work in an async task, because we need to use the network anyway
         new AsyncTask<Object, Void, String>() {
+            private ProgressDialog mDlg;
+
+            @Override
+            protected void onPreExecute() {
+                mDlg = new ProgressDialog(MainActivity.this);
+                mDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                mDlg.setMessage("잠시만 기다려 주세요...");
+                mDlg.show();
+
+                super.onPreExecute();
+            }
             @Override
             protected String doInBackground(Object... params) {
                 try {
@@ -606,6 +619,15 @@ public class MainActivity extends AppCompatActivity
             }
 
             protected void onPostExecute(String result) {
+                mDlg.dismiss();
+                strcam.clear();
+                for (int i = 0; i < ocrtemp.length; i++) {
+                    if (result.contains(ocrtemp[i])) {
+                        strcam.add(ocrtemp[i]);
+                        Log.i("YSTest2", ocrtemp[i]);
+                    }
+                }
+                camdialog();
             }
         }.execute();
     }
@@ -869,6 +891,22 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
+    }
+
+    public void camdialog() {
+        final F1_CameraList dialog = new F1_CameraList(this);
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dia) {
+            }
+        });
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dia) {
+            }
+        });
+
+        dialog.show();
     }
 
 }
