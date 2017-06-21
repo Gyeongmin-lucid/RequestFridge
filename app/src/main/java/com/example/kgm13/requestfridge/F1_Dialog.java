@@ -1,7 +1,9 @@
 package com.example.kgm13.requestfridge;
 
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -38,7 +40,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -53,6 +58,8 @@ import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitma
 import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
 import static com.example.kgm13.requestfridge.MainActivity.login_head;
 import static com.example.kgm13.requestfridge.F1_CameraList.camera_check;
+import static com.example.kgm13.requestfridge.R.id.image;
+// import static com.example.kgm13.requestfridge.MainActivity.dbManager;
 
 /**
  * Created by kgm13 on 2017-04-09.
@@ -92,6 +99,8 @@ public class F1_Dialog extends Dialog {
     @Nullable @Bind(R.id.f1_leftbtn) Button f1_leftbtn;
     @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
+    //getData에 대한 lock
+    Lock lock;
     public F1_Dialog(Context context) {
         super(context);
     }
@@ -103,8 +112,8 @@ public class F1_Dialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_f1_dialog);
         ButterKnife.bind(this);
-
         dbManager = new F1_DBManager(getContext().getApplicationContext(), "Fridge.db", null, 1);
+        lock = new ReentrantLock();
         f1_datepicker.init(f1_datepicker.getYear(),
                 f1_datepicker.getMonth(),
                 f1_datepicker.getDayOfMonth(),
@@ -292,7 +301,6 @@ public class F1_Dialog extends Dialog {
 
     //////////////////////////JSON -> android 연동////////////////////////////////////////
     void showList(String myJSON) {
-        Log.e("temp", listname);
         final String TAG_RESULTS = "result";
         final String TAG_URL = "list";
         final String TAG_EXPIRE = "expire";
@@ -318,15 +326,16 @@ public class F1_Dialog extends Dialog {
             String resName = "@drawable/" + url;
             int image = getContext().getResources().getIdentifier(resName, "drawable", PACKAGE_NAME);
             setImageToSQLite(image);
-
         }
         catch (JSONException e) {
             int image = imagechoose(listname);
             setImageToSQLite(image);
+
         }
         catch (Exception t) {
             int image = imagechoose(listname);
             setImageToSQLite(image);
+
         }
     }
 
@@ -347,14 +356,24 @@ public class F1_Dialog extends Dialog {
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
         if(login_check) {
-            Log.e("temp", listname);
             setData(image);
         }
         else {
-            Log.e("DB", String.valueOf(image));
-            Log.e("DB", listname);
-            dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
-
+            SQLiteDatabase db;
+            F1_DBManager dbmanager = new F1_DBManager(getContext().getApplicationContext(),"Fridge.db", null, 1);
+            ContentValues values = new ContentValues();
+            values.put("location", location);
+            values.put("image", image);
+            values.put("imagebitmap", 0);
+            values.put("name", listname);
+            values.put("year", year);
+            values.put("month", month);
+            values.put("day", day);
+            values.put("del", 0);
+            db = dbmanager.getWritableDatabase();
+            db.insert("Fridge",null, values);
+            db.close();
+            db1_check = true;
         }
     }
     public static Bitmap createImage(int width, int height, int color) {
@@ -418,7 +437,6 @@ public class F1_Dialog extends Dialog {
                         buff.append(line + "\n");
                     }
                     data = buff.toString().trim();
-                    Log.e("RECV DATA",data);
                     camera_check = true;
 
 
@@ -432,5 +450,18 @@ public class F1_Dialog extends Dialog {
         }
         set_fridge g = new set_fridge(image);
         g.execute();
+    }
+    public void getarraylist(ArrayList<String> arr){
+        int len = arr.size();
+        for(int i = 0 ; i < len ; i++){
+            lock.lock();
+            try {
+                listname = arr.get(i);
+                getData();
+            }
+            finally{
+                lock.unlock();
+            }
+        }
     }
 }

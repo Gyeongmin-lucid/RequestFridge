@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,7 @@ import butterknife.ButterKnife;
 import static android.R.attr.key;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.kgm13.requestfridge.F1_Dialog.createImage;
+import static com.example.kgm13.requestfridge.F1_Dialog.db1_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
@@ -62,7 +64,6 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     ////////////////////////////DB 변수////////////////////////////
     SQLiteDatabase db;
-    boolean FridgeDB_check;              // 끄고 다시 들어올때 db가 있는지 없는지 체크
     int image;
     String url, location, name;
     int year, month, day, dayleft, del;       // D-day의 year,month, day + dayleft : day기준 얼마나 남았는지 계산
@@ -91,12 +92,12 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
 
         //화면을 위로 올렸을때 새로고침이 동작하는 코드
+
         swipeRefreshLayout = (SwipeRefreshLayout) f1_view.findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeResources(R.color.yellow, R.color.red, R.color.Black, R.color.blue);
-
-        FridgeDB_check = term.getBoolean("F1_db", false);
-        if(FridgeDB_check && !login_check) {
+        db1_check= term.getBoolean("F1_db", false);
+        if(db1_check && !login_check) {
             try {
                 // 데이터베이스 객체를 얻어오는 다른 간단한 방법
                 //location을 저장을 하고 들고오지 않음 아직!!! 이거 수정해야함!!!!
@@ -334,15 +335,17 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     @Override
     public void onRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                gridArray.clear();
-                SQLgetdata();
-                gridView.setAdapter(customGridAdapter);
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        },2000);
+        if(login_check) {
+            swipeRefreshLayout.setRefreshing(true);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    gridArray.clear();
+                    SQLgetdata();
+                    gridView.setAdapter(customGridAdapter);
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }, 2000);
+        }
     }
 }

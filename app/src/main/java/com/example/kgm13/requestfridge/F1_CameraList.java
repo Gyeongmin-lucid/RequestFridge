@@ -15,7 +15,10 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.MainActivity.strcam;
 
 /**
@@ -27,9 +30,26 @@ public class F1_CameraList extends Dialog {
     private Context context;
     public static boolean camera_check = true;
 
+    Lock lock;
     public F1_CameraList(@NonNull Context _context) {
         super(_context);
         this.context = _context;
+    }
+
+    public void fab1() {
+        final F1_CameraDialog dialog = new F1_CameraDialog(f1_view.getContext());
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dia) {
+            }
+        });
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dia) {
+            }
+        });
+
+        dialog.show();
     }
 
     @Override
@@ -39,15 +59,15 @@ public class F1_CameraList extends Dialog {
         setContentView(R.layout.activity_f1_cameralist);
 
         final ArrayAdapter camera_adapter = new ArrayAdapter(context, android.R.layout.simple_list_item_single_choice, strcam);
-
+        lock = new ReentrantLock();
         final ListView camera_listview = (ListView) findViewById(R.id.cameralist);
         camera_listview.setAdapter(camera_adapter);
 
-        Button addButton = (Button)findViewById(R.id.cameralist_add);
-        Button modifyButton = (Button)findViewById(R.id.cameralist_modify);
-        Button deleteButton = (Button)findViewById(R.id.cameralist_delete);
-        Button setButton = (Button)findViewById(R.id.cameralist_set);
-        Button registButton = (Button)findViewById(R.id.cameralist_regist);
+        Button addButton = (Button) findViewById(R.id.cameralist_add);
+        Button modifyButton = (Button) findViewById(R.id.cameralist_modify);
+        Button deleteButton = (Button) findViewById(R.id.cameralist_delete);
+        Button setButton = (Button) findViewById(R.id.cameralist_set);
+        Button registButton = (Button) findViewById(R.id.cameralist_regist);
 
         addButton.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -131,7 +151,8 @@ public class F1_CameraList extends Dialog {
         setButton.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                fab1();
+                dismiss();
             }
         });
 
@@ -139,27 +160,21 @@ public class F1_CameraList extends Dialog {
             @Override
             public void onClick(View v) {
                 F1_Dialog[] dialog = new F1_Dialog[strcam.size()];
-                for(int i = 0 ; i < strcam.size() ; i++){
-                    dialog[i] = new F1_Dialog(context);
-                }
                 for (int i = 0; i < strcam.size(); i++) {
+                    dialog[i] = new F1_Dialog(context);
                     dialog[i].listname = strcam.get(i);
-                    Log.e("Camera", dialog[i].listname);
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-                    dialog[i].getData();
+                    lock.lock();
+                    try {
+                        dialog[i].getData();
+                    }
+                    finally{
+                        lock.unlock();
+                    }
                 }
-
                 dismiss();
-
             }
         });
 
     }
-
-
 
 }

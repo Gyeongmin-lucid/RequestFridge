@@ -1,7 +1,9 @@
 package com.example.kgm13.requestfridge;
 
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -21,6 +23,8 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -36,7 +40,10 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -49,8 +56,10 @@ import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
 import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
-import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
+import static com.example.kgm13.requestfridge.MainActivity.login_head;
 import static com.example.kgm13.requestfridge.F1_CameraList.camera_check;
+import static com.example.kgm13.requestfridge.MainActivity.strcam;
+// import static com.example.kgm13.requestfridge.MainActivity.dbManager;
 
 /**
  * Created by kgm13 on 2017-04-09.
@@ -59,6 +68,10 @@ import static com.example.kgm13.requestfridge.F1_CameraList.camera_check;
 
 
 public class F1_CameraDialog extends Dialog {
+    ////////////////////////////Firebase(실시간) 변수////////////////////////////
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference databaseReference = firebaseDatabase.getReference();
+
     ////////////////////////////내부DB 변수////////////////////////////
     F1_DBManager dbManager;
     static boolean db1_check = false;
@@ -86,10 +99,16 @@ public class F1_CameraDialog extends Dialog {
     @Nullable @Bind(R.id.f1_leftbtn) Button f1_leftbtn;
     @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
+    //getData에 대한 lock
+    Lock lock;
+
+    //계속 추가하기에 대한 count
+    int addcount = 0;
 
     public F1_CameraDialog(Context context) {
         super(context);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,8 +116,9 @@ public class F1_CameraDialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_f1_dialog);
         ButterKnife.bind(this);
-
         dbManager = new F1_DBManager(getContext().getApplicationContext(), "Fridge.db", null, 1);
+        lock = new ReentrantLock();
+        f1_listname.setText(strcam.get(0));
         f1_datepicker.init(f1_datepicker.getYear(),
                 f1_datepicker.getMonth(),
                 f1_datepicker.getDayOfMonth(),
@@ -138,8 +158,13 @@ public class F1_CameraDialog extends Dialog {
                     Snackbar.make(v, "설정을 다시해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 else {
                     getData();
-                    Snackbar.make(v, listname +"이(가) 추가되었습니다!", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
+                    Snackbar.make(v, listname + "이(가) 추가되었습니다!", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
                     db1_check = true;
+                    addcount++;
+                    if (addcount == strcam.size())
+                        dismiss();
+                    if (addcount < strcam.size())
+                        f1_listname.setText(strcam.get(addcount));
                 }
             }
         });
@@ -229,7 +254,7 @@ public class F1_CameraDialog extends Dialog {
     }
 
     //////////////////////////sql -> JSON 연동////////////////////////////////////////
-    void getData() {
+    protected void getData() {
         class GetDataJSON extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
@@ -277,7 +302,6 @@ public class F1_CameraDialog extends Dialog {
             @Override
             protected void onPostExecute(String result) {
                 String myJSON = result;
-                System.out.println("==========result : " + result);
                 showList(myJSON);
             }
         }
@@ -287,7 +311,6 @@ public class F1_CameraDialog extends Dialog {
 
     //////////////////////////JSON -> android 연동////////////////////////////////////////
     void showList(String myJSON) {
-
         final String TAG_RESULTS = "result";
         final String TAG_URL = "list";
         final String TAG_EXPIRE = "expire";
@@ -313,15 +336,16 @@ public class F1_CameraDialog extends Dialog {
             String resName = "@drawable/" + url;
             int image = getContext().getResources().getIdentifier(resName, "drawable", PACKAGE_NAME);
             setImageToSQLite(image);
-
         }
         catch (JSONException e) {
             int image = imagechoose(listname);
             setImageToSQLite(image);
+
         }
         catch (Exception t) {
             int image = imagechoose(listname);
             setImageToSQLite(image);
+
         }
     }
 
@@ -341,14 +365,25 @@ public class F1_CameraDialog extends Dialog {
         gridArray.add(item_temp);
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
-        if(login_check)
+        if(login_check) {
             setData(image);
+        }
         else {
-            Log.e("DB", String.valueOf(image));
-            Log.e("DB", listname);
-            camera_check = true;
-            dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
-
+            SQLiteDatabase db;
+            F1_DBManager dbmanager = new F1_DBManager(getContext().getApplicationContext(),"Fridge.db", null, 1);
+            ContentValues values = new ContentValues();
+            values.put("location", location);
+            values.put("image", image);
+            values.put("imagebitmap", 0);
+            values.put("name", listname);
+            values.put("year", year);
+            values.put("month", month);
+            values.put("day", day);
+            values.put("del", 0);
+            db = dbmanager.getWritableDatabase();
+            db.insert("Fridge",null, values);
+            db.close();
+            db1_check = true;
         }
     }
     public static Bitmap createImage(int width, int height, int color) {
@@ -372,6 +407,18 @@ public class F1_CameraDialog extends Dialog {
             protected String doInBackground(String... strings) {
                 String param = "&u_id=" + login_id + "&u_location=" + location + "&u_imageUrl=" + String.valueOf(img)+ "&u_name=" + listname + "&u_year=" + String.valueOf(year) +
                         "&u_month=" + String.valueOf(month) + "&u_day=" + String.valueOf(day) + "&u_del=" + "0";
+                String json = "{\"list\" : \"" + String.valueOf(img)
+                        + "\", \"year\" : \""+ String.valueOf(year)
+                        + "\", \"month\" : \""+ String.valueOf(month)
+                        + "\", \"day\" : \""+ String.valueOf(day)
+                        + "\", \"location\" : \"" + location
+                        + "\", \"name\" : \"" + listname
+                        + "\", \"head\" : \"" + login_head
+                        + "\", \"send\" : \"" + login_id
+                        + "\", \"sendtime\" : \"" + String.valueOf(System.currentTimeMillis())
+                        + "\"}";
+                FirebaseDB firemessage = new FirebaseDB(login_id, json);  // 유저 이름과 메세지로 chatData 만들기
+                databaseReference.child("message").push().setValue(firemessage);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 try {
                     URL url = new URL("http://13.124.64.178/set_fridge.php");
 
@@ -391,7 +438,6 @@ public class F1_CameraDialog extends Dialog {
                     BufferedReader in = null;
                     String data = "";
 
-                    //is = conn.getErrorStream();
                     is = conn.getInputStream();
                     in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
                     String line = null;
@@ -401,7 +447,6 @@ public class F1_CameraDialog extends Dialog {
                         buff.append(line + "\n");
                     }
                     data = buff.toString().trim();
-                    Log.e("RECV DATA",data);
                     camera_check = true;
 
 
@@ -415,5 +460,18 @@ public class F1_CameraDialog extends Dialog {
         }
         set_fridge g = new set_fridge(image);
         g.execute();
+    }
+    public void getarraylist(ArrayList<String> arr){
+        int len = arr.size();
+        for(int i = 0 ; i < len ; i++){
+            lock.lock();
+            try {
+                listname = arr.get(i);
+                getData();
+            }
+            finally{
+                lock.unlock();
+            }
+        }
     }
 }
