@@ -48,6 +48,7 @@
         <activity android:name=".Shopping" />
         <activity android:name=".TabPagerAdapter" />
         <activity android:name=".F2_listview" />
+        <activity android:name=".F1_CameraList" />
 
         <meta-data
             android:name="com.kakao.sdk.AppKey"

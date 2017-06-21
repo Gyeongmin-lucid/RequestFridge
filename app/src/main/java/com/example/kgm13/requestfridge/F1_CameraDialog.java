@@ -21,8 +21,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -51,7 +49,6 @@ import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
 import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
-import static com.example.kgm13.requestfridge.MainActivity.login_head;
 import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
 import static com.example.kgm13.requestfridge.F1_CameraList.camera_check;
 
@@ -61,11 +58,7 @@ import static com.example.kgm13.requestfridge.F1_CameraList.camera_check;
  */
 
 
-public class F1_Dialog extends Dialog {
-    ////////////////////////////Firebase(실시간) 변수////////////////////////////
-    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference databaseReference = firebaseDatabase.getReference();
-
+public class F1_CameraDialog extends Dialog {
     ////////////////////////////내부DB 변수////////////////////////////
     F1_DBManager dbManager;
     static boolean db1_check = false;
@@ -94,7 +87,7 @@ public class F1_Dialog extends Dialog {
     @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
 
-    public F1_Dialog(Context context) {
+    public F1_CameraDialog(Context context) {
         super(context);
     }
 
@@ -236,7 +229,7 @@ public class F1_Dialog extends Dialog {
     }
 
     //////////////////////////sql -> JSON 연동////////////////////////////////////////
-    protected void getData() {
+    void getData() {
         class GetDataJSON extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
@@ -284,6 +277,7 @@ public class F1_Dialog extends Dialog {
             @Override
             protected void onPostExecute(String result) {
                 String myJSON = result;
+                System.out.println("==========result : " + result);
                 showList(myJSON);
             }
         }
@@ -293,7 +287,7 @@ public class F1_Dialog extends Dialog {
 
     //////////////////////////JSON -> android 연동////////////////////////////////////////
     void showList(String myJSON) {
-        Log.e("temp", listname);
+
         final String TAG_RESULTS = "result";
         final String TAG_URL = "list";
         final String TAG_EXPIRE = "expire";
@@ -347,13 +341,12 @@ public class F1_Dialog extends Dialog {
         gridArray.add(item_temp);
         customGridAdapter.notifyDataSetChanged();
         gridView.setAdapter(customGridAdapter);
-        if(login_check) {
-            Log.e("temp", listname);
+        if(login_check)
             setData(image);
-        }
         else {
             Log.e("DB", String.valueOf(image));
             Log.e("DB", listname);
+            camera_check = true;
             dbManager.insert("insert into FRIDGE values(null, '" + location + "', " + image + ", " + 0 + ", '" + listname + "', " + year + ", " + month + ", " + day + ", " + 0 + ");");
 
         }
@@ -379,18 +372,6 @@ public class F1_Dialog extends Dialog {
             protected String doInBackground(String... strings) {
                 String param = "&u_id=" + login_id + "&u_location=" + location + "&u_imageUrl=" + String.valueOf(img)+ "&u_name=" + listname + "&u_year=" + String.valueOf(year) +
                         "&u_month=" + String.valueOf(month) + "&u_day=" + String.valueOf(day) + "&u_del=" + "0";
-                String json = "{\"list\" : \"" + String.valueOf(img)
-                        + "\", \"year\" : \""+ String.valueOf(year)
-                        + "\", \"month\" : \""+ String.valueOf(month)
-                        + "\", \"day\" : \""+ String.valueOf(day)
-                        + "\", \"location\" : \"" + location
-                        + "\", \"name\" : \"" + listname
-                        + "\", \"head\" : \"" + login_head
-                        + "\", \"send\" : \"" + login_id
-                        + "\", \"sendtime\" : \"" + String.valueOf(System.currentTimeMillis())
-                        + "\"}";
-                FirebaseDB firemessage = new FirebaseDB(login_id, json);  // 유저 이름과 메세지로 chatData 만들기
-                databaseReference.child("message").push().setValue(firemessage);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 try {
                     URL url = new URL("http://13.124.64.178/set_fridge.php");
 
@@ -410,6 +391,7 @@ public class F1_Dialog extends Dialog {
                     BufferedReader in = null;
                     String data = "";
 
+                    //is = conn.getErrorStream();
                     is = conn.getInputStream();
                     in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
                     String line = null;
