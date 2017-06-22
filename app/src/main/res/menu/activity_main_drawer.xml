@@ -10,12 +10,14 @@
         app:actionLayout="@layout/menu_switch"
         app:showAsAction="always">
     </item>
-    <TimePicker
-    android:id="@+id/nav_time_picker"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerHorizontal="true"></TimePicker>
-
+    <item
+        android:id="@+id/nav_alarm_spinner_hour"
+        android:title=""
+        app:actionLayout="@layout/spinner"></item>
+    <item
+        android:id="@+id/nav_alarm_spinner_min"
+        android:title=""
+        app:actionLayout="@layout/spinner"></item>
     <item
         android:id="@+id/book_mark"
         android:title="즐겨찾기 관리"></item>
