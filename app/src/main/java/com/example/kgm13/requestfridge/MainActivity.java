@@ -31,6 +31,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import static com.example.kgm13.requestfridge.LoginActivity.login_token;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
@@ -59,7 +60,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -79,8 +79,6 @@ import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
-import static com.example.kgm13.requestfridge.LoginActivity.login_token;
-
 import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
 import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
 import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
