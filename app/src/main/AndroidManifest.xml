@@ -21,6 +21,7 @@
         <activity
             android:name=".MainActivity"
             android:label=" "
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".LoginActivity">
             <intent-filter>
@@ -59,7 +60,8 @@
         <activity android:name=".Dialog_Shareconfirm"></activity>
 
         <service android:name=".FirebaseMessagingReceive" />
-        <receiver android:name = ".AlarmReceiver"></receiver>
+
+        <receiver android:name=".AlarmReceiver"></receiver>
     </application>
 
     <service android:name=".FirebaseInstanceIDService">
@@ -72,6 +74,8 @@
             <action android:name="com.google.firebase.MESSAGING_EVENT" />
         </intent-filter>
     </service>
+    <service android:name=".Alarm"
+        android:enable="true"/>
 
 
 </manifest>
