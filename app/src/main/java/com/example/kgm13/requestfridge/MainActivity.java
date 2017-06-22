@@ -59,7 +59,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -79,8 +78,6 @@ import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
-import static com.example.kgm13.requestfridge.LoginActivity.login_token;
-
 import static com.example.kgm13.requestfridge.RecommandDB.get_cuisine;
 import static com.example.kgm13.requestfridge.RecommandDB.get_ingredient;
 import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
@@ -88,6 +85,7 @@ import static com.example.kgm13.requestfridge.RecommandDB.get_stage;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, CompoundButton.OnCheckedChangeListener {
 
+    private static int ONE_MINUTE = 5625;
     private TabLayout tabLayout;                    // 타이틀 3개를 나눠주는 tablayout
     private ViewPager viewPager;                    // 3개의 각각 layout를 띄울 페이저 변수
     public static Context context_final;
@@ -134,6 +132,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        new AlarmM(getApplicationContext()).Alarm();
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
 
