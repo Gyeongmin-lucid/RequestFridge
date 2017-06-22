@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity
     //spinner 내부
     private String[] NavSortItem = {"유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
     private String[] NavAlarmHourItem = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14", "15", "16", "17","18","19","20","21","22","23","24"};
-    private String[] NavAlarmMinItem = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14", "15", "16", "17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","0"};
+    private String[] NavAlarmMinItem = {"0","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14", "15", "16", "17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"};
 
     //viewpiger 변수
     boolean f1 = true;                              //fridge에 대한 페이저 view on,off 확인
@@ -133,7 +133,8 @@ public class MainActivity extends AppCompatActivity
     public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
-
+    public int hour;
+    public int min;
     private static final String CLOUD_VISION_API_KEY = "AIzaSyC2xSl-DIQ3DAODIrFROW_-fHF-tqxmP9s";
     public static final String FILE_NAME = "temp.jpg";
 
@@ -292,6 +293,7 @@ public class MainActivity extends AppCompatActivity
                     Toast.makeText(MainActivity.this, NavAlarmHourItem[position] + " 시", Toast.LENGTH_SHORT).show();
                     a = NavAlarmHourItem[position];
                 }
+                hour = Integer.parseInt(a);
             }
 
             @Override
@@ -307,6 +309,8 @@ public class MainActivity extends AppCompatActivity
                     Toast.makeText(MainActivity.this, NavAlarmMinItem[position] + " 분", Toast.LENGTH_SHORT).show();
                     a = NavAlarmMinItem[position];
                 }
+
+                min = Integer.parseInt(a);
             }
 
             @Override
@@ -1063,6 +1067,7 @@ public class MainActivity extends AppCompatActivity
 
         dialog.show();
     }
+
     public class mAlarm{
         private Context context;
         public mAlarm(Context context){
@@ -1073,7 +1078,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
             PendingIntent sender = PendingIntent.getBroadcast(MainActivity.this, 0, intent, 0);
             Calendar calendar = Calendar.getInstance();
-            calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), 13,05,0);
+            calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), hour,min,0);
             am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
         }
     }
