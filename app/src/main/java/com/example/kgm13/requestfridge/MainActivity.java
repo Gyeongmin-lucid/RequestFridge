@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
     public static int perform = 1;//처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
-    public static String[] ocrtemp = new String[200];
+    public static String[] ocrtemp = new String[1000];
     public static ArrayList<String> strcam = new ArrayList<String>();
 
     //token 변수
