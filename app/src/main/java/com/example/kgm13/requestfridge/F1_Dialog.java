@@ -111,7 +111,6 @@ public class F1_Dialog extends Dialog {
         setContentView(R.layout.activity_f1_dialog);
         ButterKnife.bind(this);
         dbManager = new F1_DBManager(getContext().getApplicationContext(), "Fridge.db", null, 1);
-        lock = new ReentrantLock();
         f1_datepicker.init(f1_datepicker.getYear(),
                 f1_datepicker.getMonth(),
                 f1_datepicker.getDayOfMonth(),
