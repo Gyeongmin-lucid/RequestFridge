@@ -12,15 +12,12 @@
     </item>
     <item
         android:id="@+id/nav_alarm_spinner_hour"
-        android:title=""
-        app:actionLayout="@layout/spinner"></item>
-    <item
+        app:actionLayout="@layout/spinner"
+        android:title="" />
+  <item
         android:id="@+id/nav_alarm_spinner_min"
         android:title=""
         app:actionLayout="@layout/spinner"></item>
-    <item
-        android:id="@+id/book_mark"
-        android:title="즐겨찾기 관리"></item>
     <item
         android:id="@+id/login"
         android:title="로그인을 해주세요"></item>
