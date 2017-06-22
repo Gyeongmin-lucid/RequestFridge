@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
     public static int perform = 1;//처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
-    public static String[] ocrtemp = new String[200];
+    public static String[] ocrtemp = new String[1000];
     public static ArrayList<String> strcam = new ArrayList<String>();
 
     //token 변수
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity
 
     public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
-
+    public boolean alarmchecked;
     public int hour;
     public int min;
     private static final String CLOUD_VISION_API_KEY = "AIzaSyC2xSl-DIQ3DAODIrFROW_-fHF-tqxmP9s";
@@ -255,32 +255,18 @@ public class MainActivity extends AppCompatActivity
 //spinner
         final Spinner alarmspinner;
         final Spinner alarmspinnermin;
-//        final Spinner sortspinner;
+        SwitchCompat switch2;
         Menu menu1 = navigationView.getMenu();
-//        mTimePicker = (TimePicker)menu1.findItem(R.id.nav_time_picker);
-//        Menu menu2 = navigationView.getMenu();
-        MenuItem alarmitem = menu1.findItem(R.id.alarm_switch);
+        //MenuItem alarmitem = menu1.findItem(R.id.alarm_switch);
 
-        SwitchCompat switchCompat = (SwitchCompat) alarmitem.getActionView().findViewById(R.id.switchcompat);
-        switchCompat.setOnCheckedChangeListener(this);
-//        sortspinner = (Spinner) menu1.findItem(R.id.nav_sort_spinner).getActionView();
-//        sortspinner.setAdapter(new ArrayAdapter<String>(
-//                this, android.R.layout.simple_spinner_dropdown_item, NavSortItem));
-//        sortspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        switch2 = (SwitchCompat)menu1.findItem(R.id.alarm_switch);
+        switch2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                String a = NavSortItem[0];
-//                if (!a.equals(sortspinner.getSelectedItem().toString())) {
-//                    Toast.makeText(MainActivity.this, NavSortItem[position], Toast.LENGTH_SHORT).show();
-//                    a = NavSortItem[position];
-//                }
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                alarmchecked = isChecked;
+            }
+        });
+
         alarmspinner = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_hour).getActionView();
         alarmspinnermin = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_min).getActionView();
         alarmspinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmHourItem));
@@ -1080,6 +1066,10 @@ public class MainActivity extends AppCompatActivity
             Calendar calendar = Calendar.getInstance();
             calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), hour,min,0);
             am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
+            if(!alarmchecked) {
+                am.cancel(sender);
+                sender.cancel();
+            }
         }
     }
 }
