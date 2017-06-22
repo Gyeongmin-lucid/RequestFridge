@@ -16,7 +16,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -37,6 +45,7 @@ import java.util.Calendar;
 
 import butterknife.ButterKnife;
 
+import static android.R.attr.key;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.kgm13.requestfridge.F1_Dialog.createImage;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
@@ -44,6 +53,7 @@ import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
 import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
+import static com.example.kgm13.requestfridge.MainActivity.login_head;
 import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
 
 
@@ -53,12 +63,13 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
     ////////////////////////////DB 변수////////////////////////////
     SQLiteDatabase db;
     boolean FridgeDB_check;              // 끄고 다시 들어올때 db가 있는지 없는지 체크
-
     int image;
-    String location, name;
+    String url, location, name;
     int year, month, day, dayleft, del;       // D-day의 year,month, day + dayleft : day기준 얼마나 남았는지 계산
 
-
+    ////////////////////////////실시간 DB 변수////////////////////////////
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    private DatabaseReference databaseReference = firebaseDatabase.getReference();
 
     ////////////////////////////gridview 변수////////////////////////////
     SwipeRefreshLayout swipeRefreshLayout;
@@ -79,9 +90,9 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
         customGridAdapter = new F1_GridViewAdapter(getActivity(), R.layout.activity_f1_fridge_gridview, gridArray);
 
 
+        //화면을 위로 올렸을때 새로고침이 동작하는 코드
         swipeRefreshLayout = (SwipeRefreshLayout) f1_view.findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(this);
-
         swipeRefreshLayout.setColorSchemeResources(R.color.yellow, R.color.red, R.color.Black, R.color.blue);
 
         FridgeDB_check = term.getBoolean("F1_db", false);
@@ -117,6 +128,67 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
             SQLgetdata();
             gridView.setAdapter(customGridAdapter);
         }
+
+        databaseReference.child("message").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                FirebaseDB firemessage = dataSnapshot.getValue(FirebaseDB.class);  // chatData를 가져오고
+                final String TAG_URL = "list";
+                final String TAG_YEAR = "year";
+                final String TAG_MONTH = "month";
+                final String TAG_DAY = "day";
+                final String TAG_LOCATION = "location";
+                final String TAG_NAME = "name";
+                final String TAG_HEAD = "head";
+                final String TAG_SEND = "send";
+                final String TAG_SENDTIME = "sendtime";
+
+                try {
+                    JSONObject c = new JSONObject(firemessage.getMessage());
+
+                    image = c.getInt(TAG_URL);
+                    year = c.getInt(TAG_YEAR);
+                    month = c.getInt(TAG_MONTH);
+                    day = c.getInt(TAG_DAY);
+                    location = c.getString(TAG_LOCATION);
+                    name = c.getString(TAG_NAME);
+                    String head = c.getString(TAG_HEAD);
+                    String send = c.getString(TAG_SEND);
+                    long timecheck = System.currentTimeMillis() - c.getLong(TAG_SENDTIME);
+
+                    dayleft = set_dayleft(year, month, day);
+
+
+                    if (timecheck<3000 && login_head.equals(head) && (!login_id.equals(send))) {
+                        Toast.makeText(getContext(), send + "님이 " + name +"을 추가하셨습니다!", Toast.LENGTH_SHORT).show();
+
+                        gridArray.add(new Item(set_image(image, dayleft), name, dayleft));
+                        customGridAdapter.notifyDataSetChanged();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                }
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+
 
         return f1_view;
     }
@@ -157,7 +229,6 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     public Bitmap set_image(int image, int dayleft){
         Bitmap imagebitmap;
-        System.out.println("======image, dayleft : " + image + dayleft);
         if(image != 0){
             imagebitmap = BitmapFactory.decodeResource(f1_view.getContext().getResources(), image);
         }
@@ -243,8 +314,6 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
             JSONObject jsonObj = new JSONObject(myJSON);
             JSONArray jsonArray = jsonObj.getJSONArray(TAG_RESULTS);
             for(int i = 0; i < jsonArray.length() ; i++) {
-                //순서 location, url, name, ytaer, month, day, del
-                System.out.println("=================i : " + i);
                 JSONObject c = jsonArray.getJSONObject(i);
                 location = c.getString(TAG_location);
                 image = Integer.parseInt(c.getString(TAG_URL));
@@ -254,14 +323,12 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
                 day = Integer.parseInt(c.getString(TAG_day));
                 del = Integer.parseInt(c.getString(TAG_del));
                 dayleft = set_dayleft(year,month,day);
-                System.out.println("======location, image, name, year, month, day :" + location + "\t"+ image+ "\t" + name+ "\t" + year + month + "\t" + day);
                 gridArray.add(new Item(set_image(image, dayleft), name ,dayleft));
                 customGridAdapter.notifyDataSetChanged();
             }
             gridView.setAdapter(customGridAdapter);
 
         } catch (JSONException e) {
-            System.out.println("error33");
         }
     }
 
