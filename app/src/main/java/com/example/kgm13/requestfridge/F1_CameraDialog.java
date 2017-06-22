@@ -40,6 +40,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -56,7 +57,9 @@ import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
 import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
 import static com.example.kgm13.requestfridge.MainActivity.login_head;
-import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
+import static com.example.kgm13.requestfridge.F1_CameraList.camera_check;
+import static com.example.kgm13.requestfridge.MainActivity.strcam;
+// import static com.example.kgm13.requestfridge.MainActivity.dbManager;
 
 /**
  * Created by kgm13 on 2017-04-09.
@@ -64,7 +67,7 @@ import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
  */
 
 
-public class F1_Dialog extends Dialog {
+public class F1_CameraDialog extends Dialog {
     ////////////////////////////Firebase(실시간) 변수////////////////////////////
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
@@ -96,9 +99,16 @@ public class F1_Dialog extends Dialog {
     @Nullable @Bind(R.id.f1_leftbtn) Button f1_leftbtn;
     @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
-    public F1_Dialog(Context context) {
+    //getData에 대한 lock
+    Lock lock;
+
+    //계속 추가하기에 대한 count
+    int addcount = 0;
+
+    public F1_CameraDialog(Context context) {
         super(context);
     }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,8 +116,9 @@ public class F1_Dialog extends Dialog {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_f1_dialog);
         ButterKnife.bind(this);
-
         dbManager = new F1_DBManager(getContext().getApplicationContext(), "Fridge.db", null, 1);
+        lock = new ReentrantLock();
+        f1_listname.setText(strcam.get(0));
         f1_datepicker.init(f1_datepicker.getYear(),
                 f1_datepicker.getMonth(),
                 f1_datepicker.getDayOfMonth(),
@@ -147,9 +158,13 @@ public class F1_Dialog extends Dialog {
                     Snackbar.make(v, "설정을 다시해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 else {
                     getData();
-                    Snackbar.make(v, listname +"이(가) 추가되었습니다!", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
+                    Snackbar.make(v, listname + "이(가) 추가되었습니다!", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
                     db1_check = true;
-                    f1_listname.setText("");
+                    addcount++;
+                    if (addcount == strcam.size())
+                        dismiss();
+                    if (addcount < strcam.size())
+                        f1_listname.setText(strcam.get(addcount));
                 }
             }
         });
@@ -296,7 +311,6 @@ public class F1_Dialog extends Dialog {
 
     //////////////////////////JSON -> android 연동////////////////////////////////////////
     void showList(String myJSON) {
-
         final String TAG_RESULTS = "result";
         final String TAG_URL = "list";
         final String TAG_EXPIRE = "expire";
@@ -311,9 +325,7 @@ public class F1_Dialog extends Dialog {
 
             url = c.getString(TAG_URL);
             location = c.getString(TAG_LOCATION);
-            int temp_dayleft = c.getInt(TAG_EXPIRE);
-            if(dayleft == 0)
-                dayleft = temp_dayleft;
+            dayleft = c.getInt(TAG_EXPIRE);
 
             Calendar date = Calendar.getInstance();
             date.add(Calendar.DATE, dayleft);
@@ -324,15 +336,16 @@ public class F1_Dialog extends Dialog {
             String resName = "@drawable/" + url;
             int image = getContext().getResources().getIdentifier(resName, "drawable", PACKAGE_NAME);
             setImageToSQLite(image);
-
         }
         catch (JSONException e) {
             int image = imagechoose(listname);
             setImageToSQLite(image);
+
         }
         catch (Exception t) {
             int image = imagechoose(listname);
             setImageToSQLite(image);
+
         }
     }
 
@@ -434,7 +447,7 @@ public class F1_Dialog extends Dialog {
                         buff.append(line + "\n");
                     }
                     data = buff.toString().trim();
-                    Log.e("RECV DATA",data);
+                    camera_check = true;
 
 
                 } catch (MalformedURLException e) {
@@ -447,5 +460,18 @@ public class F1_Dialog extends Dialog {
         }
         set_fridge g = new set_fridge(image);
         g.execute();
+    }
+    public void getarraylist(ArrayList<String> arr){
+        int len = arr.size();
+        for(int i = 0 ; i < len ; i++){
+            lock.lock();
+            try {
+                listname = arr.get(i);
+                getData();
+            }
+            finally{
+                lock.unlock();
+            }
+        }
     }
 }

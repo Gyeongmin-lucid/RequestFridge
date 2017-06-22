@@ -39,6 +39,7 @@ import butterknife.ButterKnife;
 import static com.example.kgm13.requestfridge.GlobalApplication.getGlobalApplicationContext;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
+import static com.example.kgm13.requestfridge.MainActivity.login_head;
 import static com.example.kgm13.requestfridge.R.id.fab;
 
 /**
@@ -188,7 +189,7 @@ public class F1_GridViewAdapter extends ArrayAdapter<Item> {
         class GetDataJSON extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
-                String param = "&u_id=" + login_id + "&u_state=" + check_in + "&u_list=" + listname + "&u_year=" + e_y + "&u_month=" + e_m + "&u_day=" + e_d;
+                String param = "&u_id=" + login_head + "&u_state=" + check_in + "&u_list=" + listname + "&u_year=" + e_y + "&u_month=" + e_m + "&u_day=" + e_d;
                 try {
                     URL url = new URL("http://13.124.64.178/update_delete.php");
 
@@ -231,6 +232,7 @@ public class F1_GridViewAdapter extends ArrayAdapter<Item> {
 
             @Override
             protected void onPostExecute(String result) {
+                System.out.println("================delete sql : " + result);
             }
         }
         GetDataJSON g = new GetDataJSON();

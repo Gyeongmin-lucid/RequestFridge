@@ -1,5 +1,8 @@
 package com.example.kgm13.requestfridge;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,6 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -91,6 +95,7 @@ import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
 import static com.example.kgm13.requestfridge.F1_GridViewAdapter.checknum;
 import static com.example.kgm13.requestfridge.F1_GridViewAdapter.list_check;
+import static com.example.kgm13.requestfridge.F2_Dialog.db2_check;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
 import static com.example.kgm13.requestfridge.GlobalApplication.getGlobalApplicationContext;
 import static com.example.kgm13.requestfridge.LoginActivity.login_auto;
@@ -104,6 +109,10 @@ public class MainActivity extends AppCompatActivity
 
     private TabLayout tabLayout;                    // 타이틀 3개를 나눠주는 tablayout
     private ViewPager viewPager;                    // 3개의 각각 layout를 띄울 페이저 변수
+
+    TimePicker mTimePicker;
+    Calendar mCalendar;
+
     public static Context context_final;
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
@@ -113,6 +122,7 @@ public class MainActivity extends AppCompatActivity
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
     public static int perform = 1;//처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
     public static String[] ocrtemp = new String[1000];
+    public static ArrayList<String> strcam = new ArrayList<String>();
 
     //token 변수
     boolean tokenout = false;
@@ -123,7 +133,8 @@ public class MainActivity extends AppCompatActivity
 
     //spinner 내부
     private String[] NavSortItem = {"유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
-    private String[] NavAlarmDateItem = {"1일", "2일", "3일", "5일", "7일"};
+    private String[] NavAlarmHourItem = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14", "15", "16", "17","18","19","20","21","22","23","24"};
+    private String[] NavAlarmMinItem = {"0","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14", "15", "16", "17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"};
 
     //viewpiger 변수
     boolean f1 = true;                              //fridge에 대한 페이저 view on,off 확인
@@ -136,6 +147,8 @@ public class MainActivity extends AppCompatActivity
     int delstate = 0; //onstop -> 0, fab -> 1 (0일시, del취소, 1일시, del확정)
 
 
+    public int hour;
+    public int min;
     private static final String CLOUD_VISION_API_KEY = "AIzaSyC2xSl-DIQ3DAODIrFROW_-fHF-tqxmP9s";
     public static final String FILE_NAME = "temp.jpg";
 
@@ -194,7 +207,7 @@ public class MainActivity extends AppCompatActivity
                     checknum = 0;
                     list_check = false;
                 }
-                else if(f1) {
+                else if (f1) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder
                             .setMessage("추가")
@@ -203,14 +216,14 @@ public class MainActivity extends AppCompatActivity
                                 public void onClick(DialogInterface dialog, int which) {
                                     AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
                                     builder2
-                                            .setMessage(R.string.dialog_select_prompt)
-                                            .setPositiveButton(R.string.dialog_select_gallery, new DialogInterface.OnClickListener() {
+                                            .setMessage("사진을 선택해 주세요")
+                                            .setPositiveButton("갤러리", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     startGalleryChooser();
                                                 }
                                             })
-                                            .setNegativeButton(R.string.dialog_select_camera, new DialogInterface.OnClickListener() {
+                                            .setNegativeButton("카메라", new DialogInterface.OnClickListener() {
                                                 @Override
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     startCamera();
@@ -226,8 +239,7 @@ public class MainActivity extends AppCompatActivity
                                 }
                             });
                     builder.create().show();
-                }
-                else if (f2) {
+                } else if (f2) {
                     fab2();
                 }
             }
@@ -284,23 +296,28 @@ public class MainActivity extends AppCompatActivity
 
 //spinner
         final Spinner alarmspinner;
-        final Spinner sortspinner;
+        final Spinner alarmspinnermin;
+//        final Spinner sortspinner;
         Menu menu1 = navigationView.getMenu();
-        Menu menu2 = navigationView.getMenu();
-        MenuItem alarmitem = menu2.findItem(R.id.alarm_switch);
+//        mTimePicker = (TimePicker)menu1.findItem(R.id.nav_time_picker);
+//        Menu menu2 = navigationView.getMenu();
+        MenuItem alarmitem = menu1.findItem(R.id.alarm_switch);
+
         SwitchCompat switchCompat = (SwitchCompat) alarmitem.getActionView().findViewById(R.id.switchcompat);
         switchCompat.setOnCheckedChangeListener(this);
-        sortspinner = (Spinner) menu1.findItem(R.id.nav_sort_spinner).getActionView();
-        sortspinner.setAdapter(new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_dropdown_item, NavSortItem));
-        sortspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        alarmspinner = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_hour).getActionView();
+        alarmspinnermin = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_min).getActionView();
+        alarmspinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmHourItem));
+        alarmspinnermin.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmMinItem));
+        alarmspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String a = NavSortItem[0];
-                if (!a.equals(sortspinner.getSelectedItem().toString())) {
-                    Toast.makeText(MainActivity.this, NavSortItem[position], Toast.LENGTH_SHORT).show();
-                    a = NavSortItem[position];
+                String a = NavAlarmHourItem[0];
+                if (!a.equals(alarmspinner.getSelectedItem().toString())) {
+                    Toast.makeText(MainActivity.this, NavAlarmHourItem[position] + " 시", Toast.LENGTH_SHORT).show();
+                    a = NavAlarmHourItem[position];
                 }
+                hour = Integer.parseInt(a);
             }
 
             @Override
@@ -308,16 +325,16 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-        alarmspinner = (Spinner) menu2.findItem(R.id.nav_alarm_spinner).getActionView();
-        alarmspinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmDateItem));
-        alarmspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        alarmspinnermin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String a = NavAlarmDateItem[0];
+                String a = NavAlarmMinItem[0];
                 if (!a.equals(alarmspinner.getSelectedItem().toString())) {
-                    Toast.makeText(MainActivity.this, NavAlarmDateItem[position] + " 전 알람", Toast.LENGTH_SHORT).show();
-                    a = NavAlarmDateItem[position];
+                    Toast.makeText(MainActivity.this, NavAlarmMinItem[position] + " 분", Toast.LENGTH_SHORT).show();
+                    a = NavAlarmMinItem[position];
                 }
+
+                min = Integer.parseInt(a);
             }
 
             @Override
@@ -326,22 +343,43 @@ public class MainActivity extends AppCompatActivity
             }
         });
         hideItem();
-        if(login_head.equals("")) {
-            checkhead();
+        //if(login_head.equals("")) {
+        Lock lock = new ReentrantLock();
+        lock.lock();
+        try {
+            if(login_head.equals(""))
+                checkhead();
         }
-
-
+        finally{
+            lock.unlock();
+        }
+        //}
+        mCalendar = Calendar.getInstance();
+        int hour, min;
         databaseReference.child("share").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
                 FirebaseDB firemessage = dataSnapshot.getValue(FirebaseDB.class);  // chatData를 가져오고
                 final String TAG_SENDTIME = "sendtime";
+
                 try {
                     JSONObject c = new JSONObject(firemessage.getMessage());
                     long timecheck = System.currentTimeMillis() - c.getLong(TAG_SENDTIME);
-                    if ((perform-- == 1) && (timecheck < 3000)) {
+                    final long[] timer = {100000};
+                    System.out.println("============perform : " + perform + ", " + timecheck + ", " + timer);
+//                    if ((perform-- == 1) && (timecheck < timer[0])) {
+                    if (timecheck < timer[0]) {
                         getShare();
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        timer[0] = 100000;
+                                    }
+                                },
+                                200000
+                        );
                     }
 
                 } catch (JSONException e) {
@@ -366,6 +404,11 @@ public class MainActivity extends AppCompatActivity
             public void onCancelled(DatabaseError databaseError) {
             }
         });
+    }
+    @Override
+    protected void onStart(){
+        checkhead();
+        super.onStart();
     }
 
     @Override
@@ -395,6 +438,9 @@ public class MainActivity extends AppCompatActivity
         }
         if (db1_check)
             editor.putBoolean("F1_db", true); //First라는 key값으로 infoFirst 데이터를 저장한다.
+
+        if (db2_check)
+            editor.putBoolean("F2_db", true);
         editor.putString("ID", login_id); //First라는 key값으로 infoFirst 데이터를 저장한다.
         editor.putBoolean("login_check", login_check);
         editor.putBoolean("login_auto", login_auto);
@@ -438,8 +484,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_sort_spinner) {
-        }
+
         if (id == R.id.logout) {
             tokenDelete(login_id);
             while (!tokenout) {
@@ -454,9 +499,11 @@ public class MainActivity extends AppCompatActivity
             login_head = "";
             login_id = "";
             login_token = "";
+
             SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
             SharedPreferences.Editor editor = term.edit();
             editor.putString("ID", ""); //First라는 key값으로 infoFirst 데이터를 저장한다.
+            editor.putString("ID_head", "");
             editor.putBoolean("login_check", false);
             editor.putBoolean("login_auto", false);
             editor.putString("Token", "");
@@ -685,6 +732,22 @@ public class MainActivity extends AppCompatActivity
 
         // Do the real work in an async task, because we need to use the network anyway
         new AsyncTask<Object, Void, String>() {
+            private ProgressDialog mDlg;
+            @Override
+            protected void onPreExecute() {
+                mDlg = new ProgressDialog(MainActivity.this);
+                mDlg.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                mDlg.setMessage("잠시만 기다려 주세요...");
+                mDlg.show();
+
+                Arrays.sort(ocrtemp, new java.util.Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        return o2.length() - o1.length();
+                    }
+                });
+                super.onPreExecute();
+            }
             @Override
             protected String doInBackground(Object... params) {
                 try {
@@ -745,6 +808,19 @@ public class MainActivity extends AppCompatActivity
             }
 
             protected void onPostExecute(String result) {
+
+                mDlg.dismiss();
+                strcam.clear();
+                String foodlist = result;
+                for (int i = 0; i < ocrtemp.length; i++) {
+                    if (foodlist.contains(ocrtemp[i])) {
+                        strcam.add(ocrtemp[i]);
+                        foodlist = foodlist.replaceAll(ocrtemp[i], "");
+                        Log.i("YSTest2", ocrtemp[i]);
+                    }
+                }
+                camdialog();
+
             }
         }.execute();
     }
@@ -801,15 +877,16 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
         } else {
-            builder.append("nothing");
+            builder.append("no");
         }
+
 
         return builder.toString();
     }
 
     void initstr(String[] str) {
         for (int i = 0; i < str.length; i++)
-            str[i] = "nothing";
+            str[i] = "no";
     }
 
     /////////////////////sql code /////////////////////////
@@ -1012,6 +1089,7 @@ public class MainActivity extends AppCompatActivity
         class GetDataJSON extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
+                //String param = "&u_id=" + login_head;
                 String param = "&u_id=" + login_id;
                 try {
                     URL url = new URL("http://13.124.64.178/find_sharehead.php");
@@ -1055,6 +1133,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onPostExecute(String result) {
                 login_head = result;
+                //System.out.println("===========login_head : " + login_head);
             }
         }
         GetDataJSON g = new GetDataJSON();
@@ -1065,7 +1144,14 @@ public class MainActivity extends AppCompatActivity
         class GetDataJSON extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
-                String param = "&u_id=" + login_id + "&u_state=" + delstate;
+                String param = "&u_id=" + login_head + "&u_state=" + delstate;
+
+                String FB_json = "{\"head\" : \"" + login_head
+                        + "\", \"send\" : \"" + login_id
+                        + "\", \"sendtime\" : \"" + String.valueOf(System.currentTimeMillis())
+                        + "\"}";
+                FirebaseDB firemessage = new FirebaseDB(login_id, FB_json);  // 유저 이름과 메세지로 chatData 만들기
+                databaseReference.child("delete").push().setValue(firemessage);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
                 try {
                     URL url = new URL("http://13.124.64.178/change_delstate.php");
 
@@ -1107,9 +1193,39 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             protected void onPostExecute(String result){
+                System.out.println("=============delete complete : " + result + " ," + delstate);
             }
         }
         GetDataJSON g = new GetDataJSON();
         g.execute();
+    }
+    public void camdialog() {
+        final F1_CameraList dialog = new F1_CameraList(this);
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dia) {
+            }
+        });
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dia) {
+            }
+        });
+
+        dialog.show();
+    }
+    public class mAlarm{
+        private Context context;
+        public mAlarm(Context context){
+            this.context = context;
+        }
+        public void Alarm(){
+            AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+            PendingIntent sender = PendingIntent.getBroadcast(MainActivity.this, 0, intent, 0);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), hour,min,0);
+            am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
+        }
     }
 }

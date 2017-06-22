@@ -123,13 +123,74 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
                     long timecheck = System.currentTimeMillis() - c.getLong(TAG_SENDTIME);
 
                     dayleft = set_dayleft(year, month, day);
-
-
-                    if (timecheck<3000 && login_head.equals(head) && (!login_id.equals(send))) {
+                    final long[] timer = {100000};
+                    if (timecheck< timer[0] && login_head.equals(head) && (!login_id.equals(send))) {
                         Toast.makeText(getContext(), send + "님이 " + name +"을 추가하셨습니다!", Toast.LENGTH_SHORT).show();
-
+                        timer[0] = timecheck;
                         gridArray.add(new Item(set_image(image, dayleft), name, dayleft));
                         customGridAdapter.notifyDataSetChanged();
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        timer[0] = 100000;
+                                    }
+                                },
+                                200000
+                        );
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (NullPointerException e) {
+                }
+
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+
+        databaseReference.child("delete").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                FirebaseDB firemessage = dataSnapshot.getValue(FirebaseDB.class);  // chatData를 가져오고
+
+                final String TAG_HEAD = "head";
+                final String TAG_SEND = "send";
+                final String TAG_SENDTIME = "sendtime";
+
+                try {
+                    JSONObject c = new JSONObject(firemessage.getMessage());
+
+                    String head = c.getString(TAG_HEAD);
+                    String send = c.getString(TAG_SEND);
+                    long timecheck = System.currentTimeMillis() - c.getLong(TAG_SENDTIME);
+
+                    dayleft = set_dayleft(year, month, day);
+                    final long[] timer = {100000};
+                    System.out.println("timecheck : " + timecheck + ", login_head : " + login_head + ", " + head + "login_id : " + login_id + ", " +send);
+                    if (timecheck< timer[0] && login_head.equals(head) && (!login_id.equals(send))) {
+                        timer[0] = timecheck;
+                        Toast.makeText(getContext(), send + "님이 " + "list를 수정하셨습니다!", Toast.LENGTH_SHORT).show();
+                        LoadDBdata();
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        timer[0] = 100000;
+                                    }
+                                },
+                                200000
+                        );
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

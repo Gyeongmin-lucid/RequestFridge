@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -66,6 +67,42 @@ public class F2_Dialog  extends Dialog {
         super(context);
     }
 
+    void freezetrue() {
+        freeze = true;
+        f2_freeze.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
+        f2_freeze.setTextColor(getContext().getResources().getColor(R.color.white));
+    }
+
+    void freezefalse() {
+        freeze = false;
+        f2_freeze.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+        f2_freeze.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
+    }
+
+    void coldtrue() {
+        cold = true;
+        f2_cold.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
+        f2_cold.setTextColor(getContext().getResources().getColor(R.color.white));
+    }
+
+    void coldfalse() {
+        cold = false;
+        f2_cold.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+        f2_cold.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
+    }
+
+    void outtrue() {
+        out = true;
+        f2_out.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
+        f2_out.setTextColor(getContext().getResources().getColor(R.color.white));
+    }
+
+    void outfalse() {
+        out = false;
+        f2_out.setBackgroundColor(getContext().getResources().getColor(R.color.white));
+        f2_out.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,14 +116,12 @@ public class F2_Dialog  extends Dialog {
             @Override
             public void onClick(View v) {
                 if(!freeze){
-                    freeze = true;
-                    f2_freeze.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
-                    f2_freeze.setTextColor(getContext().getResources().getColor(R.color.white));
+                    freezetrue();
+                    coldfalse();
+                    outfalse();
                 }
                 else{
-                    freeze = false;
-                    f2_freeze.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                    f2_freeze.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
+                    freezefalse();
                 }
             }
         });
@@ -94,14 +129,12 @@ public class F2_Dialog  extends Dialog {
             @Override
             public void onClick(View v) {
                 if(!cold){
-                    cold = true;
-                    f2_cold.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
-                    f2_cold.setTextColor(getContext().getResources().getColor(R.color.white));
+                    coldtrue();
+                    freezefalse();
+                    outfalse();
                 }
                 else{
-                    cold = false;
-                    f2_cold.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                    f2_cold.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
+                    coldfalse();
                 }
             }
         });
@@ -109,17 +142,17 @@ public class F2_Dialog  extends Dialog {
             @Override
             public void onClick(View v) {
                 if(!out){
-                    out = true;
-                    f2_out.setBackgroundColor(getContext().getResources().getColor(R.color.tabcolor));
-                    f2_out.setTextColor(getContext().getResources().getColor(R.color.white));
+                    outtrue();
+                    freezefalse();
+                    coldfalse();
                 }
                 else{
-                    out = false;
-                    f2_out.setBackgroundColor(getContext().getResources().getColor(R.color.white));
-                    f2_out.setTextColor(getContext().getResources().getColor(R.color.tabcolor));
+                    outfalse();
                 }
             }
         });
+
+
 
 
 
@@ -130,32 +163,37 @@ public class F2_Dialog  extends Dialog {
             public void onClick(View v) {
                 EditToString();
 
-                if (buttoncheck()) {
-                    if (freeze) {
-                        arrayList_freeze.add(new Shopping(listname));
-                        adapter_freeze.notifyDataSetChanged();
-                        listView_freeze.setAdapter(adapter_freeze);
-                        dbManager.insert("insert into LIST values(null, " + "'freeze', " + 0 + ", '" + listname + "', " + 0 + ");");
-                    }
-                    if (cold) {
-                        arrayList_cold.add(new Shopping(listname));
-                        adapter_cold.notifyDataSetChanged();
-                        listView_cold.setAdapter(adapter_cold);
-                        dbManager.insert("insert into LIST values(null, " + "'cold', " + 0 + ", '" + listname + "', " + 0 + ");");
-                    }
-                    if (out) {
-                        arrayList_out.add(new Shopping(listname));
-                        adapter_out.notifyDataSetChanged();
-                        listView_out.setAdapter(adapter_out);
-                        dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
-                    }
-                    setData();
-                    db2_check = true;
-                    Snackbar.make(v, listname + "이 추가되었습니다!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
-                    f2_listname.setText("");
+                if (listname.equals(""))
+                    Snackbar.make(v, "이름을 입력해 주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
 
-                } else {
-                    Snackbar.make(v, "버튼 설정을 다시 확인해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                else {
+                    if (buttoncheck()) {
+                        if (freeze) {
+                            arrayList_freeze.add(new Shopping(listname));
+                            adapter_freeze.notifyDataSetChanged();
+                            listView_freeze.setAdapter(adapter_freeze);
+                            dbManager.insert("insert into LIST values(null, " + "'freeze', " + 0 + ", '" + listname + "', " + 0 + ");");
+                        }
+                        if (cold) {
+                            arrayList_cold.add(new Shopping(listname));
+                            adapter_cold.notifyDataSetChanged();
+                            listView_cold.setAdapter(adapter_cold);
+                            dbManager.insert("insert into LIST values(null, " + "'cold', " + 0 + ", '" + listname + "', " + 0 + ");");
+                        }
+                        if (out) {
+                            arrayList_out.add(new Shopping(listname));
+                            adapter_out.notifyDataSetChanged();
+                            listView_out.setAdapter(adapter_out);
+                            dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
+                        }
+                        setData();
+                        db2_check = true;
+                        Snackbar.make(v, listname + "이 추가되었습니다!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        f2_listname.setText("");
+
+                    } else {
+                        Snackbar.make(v, "버튼 설정을 다시 확인해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    }
                 }
             }
         });
@@ -166,31 +204,37 @@ public class F2_Dialog  extends Dialog {
             @Override
             public void onClick(View v) {
                 EditToString();
-                if (buttoncheck()) {
-                    if (freeze) {
-                        arrayList_freeze.add(new Shopping(listname));
-                        adapter_freeze.notifyDataSetChanged();
-                        listView_freeze.setAdapter(adapter_freeze);
-                        dbManager.insert("insert into LIST values(null, " + "'freeze', " + 0 + ", '" + listname + "', " + 0 + ");");
-                    }
-                    if (cold) {
-                        arrayList_cold.add(new Shopping(listname));
-                        adapter_cold.notifyDataSetChanged();
-                        listView_cold.setAdapter(adapter_cold);
-                        dbManager.insert("insert into LIST values(null, " + "'cold', " + 0 + ", '" + listname + "', " + 0 + ");");
-                    }
-                    if (out) {
-                        arrayList_out.add(new Shopping(listname));
-                        adapter_out.notifyDataSetChanged();
-                        listView_out.setAdapter(adapter_out);
-                        dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
-                    }
-                    setData();
-                    db2_check = true;
-                    dismiss();
 
-                } else {
-                    Snackbar.make(v, "버튼 설정을 다시 확인해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                if (listname.equals(""))
+                    Snackbar.make(v, "이름을 입력해 주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+
+                else {
+                    if (buttoncheck()) {
+                        if (freeze) {
+                            arrayList_freeze.add(new Shopping(listname));
+                            adapter_freeze.notifyDataSetChanged();
+                            listView_freeze.setAdapter(adapter_freeze);
+                            dbManager.insert("insert into LIST values(null, " + "'freeze', " + 0 + ", '" + listname + "', " + 0 + ");");
+                        }
+                        if (cold) {
+                            arrayList_cold.add(new Shopping(listname));
+                            adapter_cold.notifyDataSetChanged();
+                            listView_cold.setAdapter(adapter_cold);
+                            dbManager.insert("insert into LIST values(null, " + "'cold', " + 0 + ", '" + listname + "', " + 0 + ");");
+                        }
+                        if (out) {
+                            arrayList_out.add(new Shopping(listname));
+                            adapter_out.notifyDataSetChanged();
+                            listView_out.setAdapter(adapter_out);
+                            dbManager.insert("insert into LIST values(null, " + "'out', " + 0 + ", '" + listname + "', " + 0 + ");");
+                        }
+                        setData();
+                        db2_check = true;
+                        dismiss();
+
+                    } else {
+                        Snackbar.make(v, "버튼 설정을 다시 확인해주세요!", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    }
                 }
             }
         });
