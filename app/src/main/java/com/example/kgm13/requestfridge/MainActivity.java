@@ -407,8 +407,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_sort_spinner) {
-        }
         if (id == R.id.logout) {
             tokenDelete(login_id);
             while (!tokenout) {
