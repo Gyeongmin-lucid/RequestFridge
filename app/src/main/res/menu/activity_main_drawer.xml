@@ -2,30 +2,22 @@
 <menu
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:title="내용물 정렬 방법">
-        <menu>
-            <item
-                android:id="@+id/nav_sort_spinner"
-                android:title=""
-                app:actionLayout="@layout/spinner"></item>
-        </menu>
-    </item>
+
     <item
         android:id="@+id/alarm_switch"
         android:actionViewClass="android.support.v7.widget.SwitchCompat"
-        android:title="유통기한 알림"
+        android:title="냉장고 관리 알림"
         app:actionLayout="@layout/menu_switch"
         app:showAsAction="always">
-        <menu>
-            <item
-                android:id="@+id/nav_alarm_spinner"
-                android:title=""
-                app:actionLayout="@layout/spinner"></item>
-        </menu>
     </item>
     <item
-        android:id="@+id/book_mark"
-        android:title="즐겨찾기 관리"></item>
+        android:id="@+id/nav_alarm_spinner_hour"
+        app:actionLayout="@layout/spinner"
+        android:title="" />
+  <item
+        android:id="@+id/nav_alarm_spinner_min"
+        android:title=""
+        app:actionLayout="@layout/spinner"></item>
     <item
         android:id="@+id/login"
         android:title="로그인을 해주세요"></item>

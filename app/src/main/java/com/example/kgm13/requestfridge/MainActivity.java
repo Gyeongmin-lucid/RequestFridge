@@ -1,5 +1,7 @@
 package com.example.kgm13.requestfridge;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,6 +38,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -65,7 +68,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -99,6 +101,9 @@ public class MainActivity extends AppCompatActivity
 
     private TabLayout tabLayout;                    // 타이틀 3개를 나눠주는 tablayout
     private ViewPager viewPager;                    // 3개의 각각 layout를 띄울 페이저 변수
+  //  private static int ONE_MINUTE=5626;
+    TimePicker mTimePicker;
+    Calendar mCalendar;
     public static Context context_final;
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
@@ -120,7 +125,8 @@ public class MainActivity extends AppCompatActivity
 
     //spinner 내부
     private String[] NavSortItem = {"유통기한 짧은 순서", "먼저 들어온 순서", "카테고리 별"}; // Spinner items
-    private String[] NavAlarmDateItem = {"1일", "2일", "3일", "5일", "7일"};
+    private String[] NavAlarmHourItem = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14", "15", "16", "17","18","19","20","21","22","23","24"};
+    private String[] NavAlarmMinItem = {"0","1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12","13","14", "15", "16", "17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"};
 
     //viewpiger 변수
     boolean f1 = true;                              //fridge에 대한 페이저 view on,off 확인
@@ -129,7 +135,8 @@ public class MainActivity extends AppCompatActivity
     public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
-
+    public int hour;
+    public int min;
     private static final String CLOUD_VISION_API_KEY = "AIzaSyC2xSl-DIQ3DAODIrFROW_-fHF-tqxmP9s";
     public static final String FILE_NAME = "temp.jpg";
 
@@ -145,7 +152,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         backPressCloseHandler = new BackPressCloseHandler(this);
-
+        new mAlarm(getApplicationContext()).Alarm();
         SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
 
 
@@ -249,26 +256,48 @@ public class MainActivity extends AppCompatActivity
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons();
 
-
 //spinner
         final Spinner alarmspinner;
-        final Spinner sortspinner;
+        final Spinner alarmspinnermin;
+//        final Spinner sortspinner;
         Menu menu1 = navigationView.getMenu();
-        Menu menu2 = navigationView.getMenu();
-        MenuItem alarmitem = menu2.findItem(R.id.alarm_switch);
+//        mTimePicker = (TimePicker)menu1.findItem(R.id.nav_time_picker);
+//        Menu menu2 = navigationView.getMenu();
+        MenuItem alarmitem = menu1.findItem(R.id.alarm_switch);
+
         SwitchCompat switchCompat = (SwitchCompat) alarmitem.getActionView().findViewById(R.id.switchcompat);
         switchCompat.setOnCheckedChangeListener(this);
-        sortspinner = (Spinner) menu1.findItem(R.id.nav_sort_spinner).getActionView();
-        sortspinner.setAdapter(new ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_dropdown_item, NavSortItem));
-        sortspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//        sortspinner = (Spinner) menu1.findItem(R.id.nav_sort_spinner).getActionView();
+//        sortspinner.setAdapter(new ArrayAdapter<String>(
+//                this, android.R.layout.simple_spinner_dropdown_item, NavSortItem));
+//        sortspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                String a = NavSortItem[0];
+//                if (!a.equals(sortspinner.getSelectedItem().toString())) {
+//                    Toast.makeText(MainActivity.this, NavSortItem[position], Toast.LENGTH_SHORT).show();
+//                    a = NavSortItem[position];
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//
+//            }
+//        });
+        alarmspinner = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_hour).getActionView();
+        alarmspinnermin = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_min).getActionView();
+        alarmspinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmHourItem));
+        alarmspinnermin.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmMinItem));
+        alarmspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String a = NavSortItem[0];
-                if (!a.equals(sortspinner.getSelectedItem().toString())) {
-                    Toast.makeText(MainActivity.this, NavSortItem[position], Toast.LENGTH_SHORT).show();
-                    a = NavSortItem[position];
+                String a = NavAlarmHourItem[0];
+                if (!a.equals(alarmspinner.getSelectedItem().toString())) {
+                    Toast.makeText(MainActivity.this, NavAlarmHourItem[position] + " 시", Toast.LENGTH_SHORT).show();
+                    a = NavAlarmHourItem[position];
                 }
+                hour = Integer.parseInt(a);
             }
 
             @Override
@@ -276,16 +305,16 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-        alarmspinner = (Spinner) menu2.findItem(R.id.nav_alarm_spinner).getActionView();
-        alarmspinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmDateItem));
-        alarmspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        alarmspinnermin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String a = NavAlarmDateItem[0];
+                String a = NavAlarmMinItem[0];
                 if (!a.equals(alarmspinner.getSelectedItem().toString())) {
-                    Toast.makeText(MainActivity.this, NavAlarmDateItem[position] + " 전 알람", Toast.LENGTH_SHORT).show();
-                    a = NavAlarmDateItem[position];
+                    Toast.makeText(MainActivity.this, NavAlarmMinItem[position] + " 분", Toast.LENGTH_SHORT).show();
+                    a = NavAlarmMinItem[position];
                 }
+
+                min = Integer.parseInt(a);
             }
 
             @Override
@@ -297,6 +326,9 @@ public class MainActivity extends AppCompatActivity
         if(login_head.equals("")) {
             checkhead();
         }
+
+        mCalendar = Calendar.getInstance();
+        int hour, min;
 
         databaseReference.child("share").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
             @Override
@@ -385,8 +417,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.nav_sort_spinner) {
-        }
         if (id == R.id.logout) {
             tokenDelete(login_id);
             while (!tokenout) {
@@ -1044,4 +1074,18 @@ public class MainActivity extends AppCompatActivity
         dialog.show();
     }
 
+    public class mAlarm{
+        private Context context;
+        public mAlarm(Context context){
+            this.context = context;
+        }
+        public void Alarm(){
+            AlarmManager am = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+            PendingIntent sender = PendingIntent.getBroadcast(MainActivity.this, 0, intent, 0);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), hour,min,0);
+            am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), sender);
+        }
+    }
 }
