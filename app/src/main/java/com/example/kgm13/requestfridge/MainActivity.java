@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -17,6 +18,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -76,6 +78,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -85,7 +89,10 @@ import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
 import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
+import static com.example.kgm13.requestfridge.F1_GridViewAdapter.checknum;
+import static com.example.kgm13.requestfridge.F1_GridViewAdapter.list_check;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
+import static com.example.kgm13.requestfridge.GlobalApplication.getGlobalApplicationContext;
 import static com.example.kgm13.requestfridge.LoginActivity.login_auto;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
@@ -105,7 +112,7 @@ public class MainActivity extends AppCompatActivity
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = firebaseDatabase.getReference();
     public static int perform = 1;//처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
-    public static String[] ocrtemp = new String[200];
+    public static String[] ocrtemp = new String[1000];
 
     //token 변수
     boolean tokenout = false;
@@ -125,6 +132,9 @@ public class MainActivity extends AppCompatActivity
     public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
+    //fridge부분 del관련 확정 or 복구
+    int delstate = 0; //onstop -> 0, fab -> 1 (0일시, del취소, 1일시, del확정)
+
 
     private static final String CLOUD_VISION_API_KEY = "AIzaSyC2xSl-DIQ3DAODIrFROW_-fHF-tqxmP9s";
     public static final String FILE_NAME = "temp.jpg";
@@ -134,6 +144,10 @@ public class MainActivity extends AppCompatActivity
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
 
+
+    public FloatingActionButton getFAB() {
+        return fab;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,7 +171,30 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (f1) {
+                if (list_check) {
+                    if(login_check) {
+                        Lock lock = new ReentrantLock();
+                        lock.lock();
+                        try {
+                            delstate = 2;
+                            ChangeDelstate();
+                        } finally {
+                            lock.unlock();
+                        }
+                        F1_Fridge f1_fridge = new F1_Fridge();
+                        f1_fridge.LoadDBdata();
+                    }
+                    else{
+                        F1_DBManager dbmanager = new F1_DBManager(getApplicationContext(), "Fridge.db", null, 1);
+                        dbmanager.update("update FRIDGE set del = " + 2 + " where del = 1;");
+                    }
+                    fab.setBackgroundTintList(ColorStateList.valueOf(getGlobalApplicationContext().getResources().getColor(R.color.colorAccent)));
+                    fab.setImageDrawable(getGlobalApplicationContext().getResources().getDrawable(R.drawable.plus));
+                    fab.invalidate();
+                    checknum = 0;
+                    list_check = false;
+                }
+                else if(f1) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder
                             .setMessage("추가")
@@ -189,7 +226,8 @@ public class MainActivity extends AppCompatActivity
                                 }
                             });
                     builder.create().show();
-                } else if (f2) {
+                }
+                else if (f2) {
                     fab2();
                 }
             }
@@ -334,9 +372,29 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
         SharedPreferences.Editor editor = term.edit();
+        if(list_check){
+            if(login_check) {
+                Lock lock = new ReentrantLock();
+                lock.lock();
+                try {
+                    delstate = 0;
+                    ChangeDelstate();
+                } finally {
+                    lock.unlock();
+                }
+            }
+            else{
+                F1_DBManager dbmanager = new F1_DBManager(getApplicationContext(), "Fridge.db", null, 1);
+                dbmanager.update("update FRIDGE set del = " + 0 + " where del = 1;");
+            }
+            fab.setBackgroundTintList(ColorStateList.valueOf(getGlobalApplicationContext().getResources().getColor(R.color.colorAccent)));
+            fab.setImageDrawable(getGlobalApplicationContext().getResources().getDrawable(R.drawable.plus));
+            fab.invalidate();
+            checknum = 0;
+            list_check = false;
+        }
         if (db1_check)
             editor.putBoolean("F1_db", true); //First라는 key값으로 infoFirst 데이터를 저장한다.
-
         editor.putString("ID", login_id); //First라는 key값으로 infoFirst 데이터를 저장한다.
         editor.putBoolean("login_check", login_check);
         editor.putBoolean("login_auto", login_auto);
@@ -997,6 +1055,58 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onPostExecute(String result) {
                 login_head = result;
+            }
+        }
+        GetDataJSON g = new GetDataJSON();
+        g.execute();
+    }
+    ///////////////////////////del 최종확인/////////////////////////////////////////////////
+    void ChangeDelstate() {
+        class GetDataJSON extends AsyncTask<String, Void, String> {
+            @Override
+            protected String doInBackground(String... params) {
+                String param = "&u_id=" + login_id + "&u_state=" + delstate;
+                try {
+                    URL url = new URL("http://13.124.64.178/change_delstate.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+
+                    String json;
+                    StringBuilder sb = new StringBuilder();
+                    while ((json = in.readLine()) != null) {
+                        sb.append(json + "\n");
+                    }
+
+                    return sb.toString().trim();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String result){
             }
         }
         GetDataJSON g = new GetDataJSON();

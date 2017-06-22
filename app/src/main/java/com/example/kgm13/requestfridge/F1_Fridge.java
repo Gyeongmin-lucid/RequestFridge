@@ -23,10 +23,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,13 +44,13 @@ import butterknife.ButterKnife;
 import static android.R.attr.key;
 import static android.content.Context.MODE_PRIVATE;
 import static com.example.kgm13.requestfridge.F1_Dialog.createImage;
+import static com.example.kgm13.requestfridge.F1_Dialog.db1_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.border;
 import static com.example.kgm13.requestfridge.MLRoundedImageView.getCroppedBitmap;
-import static com.example.kgm13.requestfridge.MainActivity.PACKAGE_NAME;
 import static com.example.kgm13.requestfridge.MainActivity.login_head;
-import static com.example.kgm13.requestfridge.PermissionUtils.isOnline;
+import static com.example.kgm13.requestfridge.R.id.fab;
 
 
 public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -62,7 +58,7 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     ////////////////////////////DB 변수////////////////////////////
     SQLiteDatabase db;
-    boolean FridgeDB_check;              // 끄고 다시 들어올때 db가 있는지 없는지 체크
+    F1_DBManager manager;
     int image;
     String url, location, name;
     int year, month, day, dayleft, del;       // D-day의 year,month, day + dayleft : day기준 얼마나 남았는지 계산
@@ -83,7 +79,6 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
         f1_view = inflater.inflate(R.layout.activity_f1_fridge, container, false);
         ButterKnife.bind(getActivity());
 
-        F1_DBManager manager = new F1_DBManager(getActivity(), "Fridge.db", null, 1);
         SharedPreferences term = getActivity().getSharedPreferences("term", MODE_PRIVATE);
 
         gridView = (GridView) f1_view.findViewById(R.id.grid);
@@ -91,43 +86,14 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
 
         //화면을 위로 올렸을때 새로고침이 동작하는 코드
+
         swipeRefreshLayout = (SwipeRefreshLayout) f1_view.findViewById(R.id.swipeRefresh);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeResources(R.color.yellow, R.color.red, R.color.Black, R.color.blue);
 
-        FridgeDB_check = term.getBoolean("F1_db", false);
-        if(FridgeDB_check && !login_check) {
-            try {
-                // 데이터베이스 객체를 얻어오는 다른 간단한 방법
-                //location을 저장을 하고 들고오지 않음 아직!!! 이거 수정해야함!!!!
-                db = manager.getReadableDatabase();
-                Cursor c = db.query("FRIDGE", null, null, null, null, null, null, null);
-                gridArray.clear();
-                while (c.moveToNext()) { //db의 id를 하나씩 이동하면서 list를 추가합니다
-                    int del = c.getInt(c.getColumnIndex("del"));
-                    if (del == 0) {
-                        image = c.getInt(c.getColumnIndex("image"));
-                        name = c.getString(c.getColumnIndex("name"));
-                        year = c.getInt(c.getColumnIndex("year"));
-                        month = c.getInt(c.getColumnIndex("month"));
-                        day = c.getInt(c.getColumnIndex("day"));
+        db1_check = term.getBoolean("F1_db", false);
+        LoadDBdata();
 
-                        dayleft = set_dayleft(year,month,day);
-                        gridArray.add(new Item(set_image(image, dayleft), name ,dayleft));
-                        customGridAdapter.notifyDataSetChanged();
-                    }
-                }
-
-                gridView.setAdapter(customGridAdapter);
-            } catch (SQLiteException e) {
-                e.printStackTrace();
-            }
-        }
-        else {
-            gridArray.clear();
-            SQLgetdata();
-            gridView.setAdapter(customGridAdapter);
-        }
 
         databaseReference.child("message").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
             @Override
@@ -173,42 +139,33 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-            }
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-            }
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            }
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
-
 
         return f1_view;
     }
 
 
     @Override
-    public void setUserVisibleHint(boolean visible)
-    {
+    public void setUserVisibleHint(boolean visible) {
         super.setUserVisibleHint(visible);
-        if (visible && isResumed())
-        {
+        if (visible && isResumed()) {
             onResume();
         }
     }
 
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
-        if (!getUserVisibleHint())
-        {
+        if (!getUserVisibleHint()) {
             return;
         }
     }
@@ -229,13 +186,11 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     public Bitmap set_image(int image, int dayleft){
         Bitmap imagebitmap;
-        if(image != 0){
+        if(image != 0)
             imagebitmap = BitmapFactory.decodeResource(f1_view.getContext().getResources(), image);
-        }
-        else{
+        else
             imagebitmap = createImage(300, 300, Color.parseColor("#E1FF36"));
-        }
-        System.out.println("========imagebitmap : " + imagebitmap );
+
         imagebitmap = getCroppedBitmap(imagebitmap, imagebitmap.getHeight() / 2);
         imagebitmap = border(imagebitmap, dayleft);
 
@@ -323,8 +278,10 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
                 day = Integer.parseInt(c.getString(TAG_day));
                 del = Integer.parseInt(c.getString(TAG_del));
                 dayleft = set_dayleft(year,month,day);
-                gridArray.add(new Item(set_image(image, dayleft), name ,dayleft));
-                customGridAdapter.notifyDataSetChanged();
+                if((del == 0) && (dayleft >= 0)) {
+                    gridArray.add(new Item(set_image(image, dayleft), name, dayleft));
+                    customGridAdapter.notifyDataSetChanged();
+                }
             }
             gridView.setAdapter(customGridAdapter);
 
@@ -334,15 +291,53 @@ public class F1_Fridge extends Fragment implements SwipeRefreshLayout.OnRefreshL
 
     @Override
     public void onRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        if(login_check) {
+            swipeRefreshLayout.setRefreshing(true);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    gridArray.clear();
+                    SQLgetdata();
+                    gridView.setAdapter(customGridAdapter);
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }, 2000);
+        }
+    }
+    void LoadDBdata(){
+        if (db1_check && !login_check) {
+            try {
+                // 데이터베이스 객체를 얻어오는 다른 간단한 방법
+                //location을 저장을 하고 들고오지 않음 아직!!! 이거 수정해야함!!!!
+                F1_DBManager dbHelper = new F1_DBManager(getActivity(), "Fridge.db", null, 1);
+                SQLiteDatabase db = dbHelper.getReadableDatabase();
+                Cursor c = db.query("FRIDGE", null, null, null, null, null, null, null);
                 gridArray.clear();
-                SQLgetdata();
+                while (c.moveToNext()) { //db의 id를 하나씩 이동하면서 list를 추가합니다
+                    del = c.getInt(c.getColumnIndex("del"));
+                    image = c.getInt(c.getColumnIndex("image"));
+                    name = c.getString(c.getColumnIndex("name"));
+                    year = c.getInt(c.getColumnIndex("year"));
+                    month = c.getInt(c.getColumnIndex("month"));
+                    day = c.getInt(c.getColumnIndex("day"));
+                    dayleft = set_dayleft(year, month, day);
+                    if ((del == 0) && (dayleft >= 0)) {
+                        gridArray.add(new Item(set_image(image, dayleft), name, dayleft));
+                        customGridAdapter.notifyDataSetChanged();
+                    }
+
+                }
+
                 gridView.setAdapter(customGridAdapter);
-                swipeRefreshLayout.setRefreshing(false);
+                db.close();
+            } catch (SQLiteException e) {
+                e.printStackTrace();
             }
-        },2000);
+        }
+        else {
+            gridArray.clear();
+            SQLgetdata();
+            gridView.setAdapter(customGridAdapter);
+        }
     }
 }

@@ -65,7 +65,4 @@ public class F2_List extends Fragment {
 
         dialog.show();
     }
-
-
-
 }

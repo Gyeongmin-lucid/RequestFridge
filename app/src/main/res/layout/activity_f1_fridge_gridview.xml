@@ -1,41 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <!--전반적으로 뷰에대해서 손볼것!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!-->
     <!--ㅠㅜㅠㅜㅠㅠㅜㅠㅜㅠㅜㅠㅜㅡㅜㅡㅜㅡㅜㅡㅜㅡㅜㅡㅜㅡㅜㅜㅡㅜㅡㅜㅡㅜ-->
 
-    <TextView
-        android:background="@drawable/circle"
-        android:maxLines="1"
-        android:textStyle="bold"
-        android:id="@+id/grid_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:scaleType="center"/>
-    <ImageView
-        android:id="@+id/grid_image"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:scaleType="centerInside">
-    </ImageView>
+    <LinearLayout
+        android:id="@+id/grid_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:background="@drawable/circle"
+            android:maxLines="1"
+            android:textStyle="bold"
+            android:id="@+id/grid_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:scaleType="center"/>
+        <ImageView
+            android:id="@+id/grid_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:scaleType="centerInside">
+        </ImageView>
 
-    <TextView
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:id="@+id/grid_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="9sp"
-        android:textColor="@color/lighBlack"
-        android:layout_gravity="center">
-    </TextView>
+        <TextView
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:id="@+id/grid_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/lighBlack"
+            android:textSize="9sp"></TextView>
 
-</LinearLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        
+        <ImageView
+            android:id="@+id/checkimage"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginLeft="15dp"
+            android:visibility="invisible"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/checked"/>
+    </FrameLayout>
+
+
+
+</RelativeLayout>
 
 
