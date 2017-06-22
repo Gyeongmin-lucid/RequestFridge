@@ -3,6 +3,7 @@ package com.example.kgm13.requestfridge;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by kgm13 on 2017-04-20.
@@ -34,6 +35,7 @@ public class F1_DBManager extends SQLiteOpenHelper {
     public void insert(String _query) {
         SQLiteDatabase db = getWritableDatabase();
         db.execSQL(_query);
+        Log.e("insert", _query);
         db.close();
     }
 

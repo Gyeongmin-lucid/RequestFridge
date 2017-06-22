@@ -91,6 +91,7 @@ import static com.example.kgm13.requestfridge.LoginActivity.login_auto;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.LoginActivity.login_token;
+import static java.security.AccessController.getContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity
     public static int perform = 1;//처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
     public static String[] ocrtemp = new String[1000];
     public static ArrayList<String> strcam = new ArrayList<String>();
+    // public static F1_DBManager dbManager;
 
     //token 변수
     boolean tokenout = false;
@@ -149,6 +151,8 @@ public class MainActivity extends AppCompatActivity
 
         PACKAGE_NAME = getApplicationContext().getPackageName();
         context_final = this;
+
+        // dbManager = new F1_DBManager(context_final.getApplicationContext(), "Fridge.db", null, 1);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -293,7 +297,6 @@ public class MainActivity extends AppCompatActivity
         if(login_head.equals("")) {
             checkhead();
         }
-
 
         databaseReference.child("share").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
             @Override
