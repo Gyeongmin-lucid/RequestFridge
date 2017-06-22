@@ -59,7 +59,7 @@
         <activity android:name=".Dialog_Shareconfirm"></activity>
 
         <service android:name=".FirebaseMessagingReceive" />
-
+        <receiver android:name = ".AlarmReceiver"></receiver>
     </application>
 
     <service android:name=".FirebaseInstanceIDService">
