@@ -176,5 +176,4 @@ public class F1_CameraList extends Dialog {
         });
 
     }
-
 }

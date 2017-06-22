@@ -1,6 +1,7 @@
 package com.example.kgm13.requestfridge;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,10 +92,12 @@ public class F2_ListViewAdapter extends BaseAdapter implements View.OnClickListe
             public void onClick(View v) {
                 if (!holder.favorite.isChecked()) {
                     holder.favorite.setChecked(false);
+                    holder.favorite.setBackgroundResource(R.drawable.star_blank);
                     dbManager.update("update LIST set favorite = " + 0 + " where name = '" + holder.list.getText().toString() + "';");
                 }
                 else{
                     holder.favorite.setChecked(true);
+                    holder.favorite.setBackgroundResource(R.drawable.star_full);
                     dbManager.update("update LIST set favorite = " + 1 + " where name = '" + holder.list.getText().toString() + "';");
 
                 }
@@ -131,4 +134,3 @@ public class F2_ListViewAdapter extends BaseAdapter implements View.OnClickListe
         Button button;
     }
 }
-

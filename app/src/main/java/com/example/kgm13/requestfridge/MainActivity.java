@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -20,6 +21,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -68,6 +70,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -79,6 +82,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -88,12 +93,15 @@ import static com.example.kgm13.requestfridge.F1_Fridge.customGridAdapter;
 import static com.example.kgm13.requestfridge.F1_Fridge.f1_view;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridArray;
 import static com.example.kgm13.requestfridge.F1_Fridge.gridView;
+import static com.example.kgm13.requestfridge.F1_GridViewAdapter.checknum;
+import static com.example.kgm13.requestfridge.F1_GridViewAdapter.list_check;
+import static com.example.kgm13.requestfridge.F2_Dialog.db2_check;
 import static com.example.kgm13.requestfridge.F2_List.f2_view;
+import static com.example.kgm13.requestfridge.GlobalApplication.getGlobalApplicationContext;
 import static com.example.kgm13.requestfridge.LoginActivity.login_auto;
 import static com.example.kgm13.requestfridge.LoginActivity.login_check;
 import static com.example.kgm13.requestfridge.LoginActivity.login_id;
 import static com.example.kgm13.requestfridge.LoginActivity.login_token;
-import static java.security.AccessController.getContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -101,9 +109,10 @@ public class MainActivity extends AppCompatActivity
 
     private TabLayout tabLayout;                    // 타이틀 3개를 나눠주는 tablayout
     private ViewPager viewPager;                    // 3개의 각각 layout를 띄울 페이저 변수
-  //  private static int ONE_MINUTE=5626;
+
     TimePicker mTimePicker;
     Calendar mCalendar;
+
     public static Context context_final;
     @Nullable @Bind(R.id.toolbar) Toolbar toolbar;
     @Nullable @Bind(R.id.fab) FloatingActionButton fab;
@@ -114,7 +123,6 @@ public class MainActivity extends AppCompatActivity
     public static int perform = 1;//처음 부른 시간을 가져옴. 중복으로 들고오는걸 막아줌
     public static String[] ocrtemp = new String[1000];
     public static ArrayList<String> strcam = new ArrayList<String>();
-    // public static F1_DBManager dbManager;
 
     //token 변수
     boolean tokenout = false;
@@ -135,6 +143,10 @@ public class MainActivity extends AppCompatActivity
     public static String PACKAGE_NAME;              //현재 패키지 명에 대한 변수 : drawble에 있는 이미지에 대해서 string->int로 변환할때 쓰는 변수
     BackPressCloseHandler backPressCloseHandler;    //cancel를 두번 눌렸을때 취소가 되게 하기 위한 변수
 
+    //fridge부분 del관련 확정 or 복구
+    int delstate = 0; //onstop -> 0, fab -> 1 (0일시, del취소, 1일시, del확정)
+
+
     public int hour;
     public int min;
     private static final String CLOUD_VISION_API_KEY = "AIzaSyC2xSl-DIQ3DAODIrFROW_-fHF-tqxmP9s";
@@ -145,6 +157,10 @@ public class MainActivity extends AppCompatActivity
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
 
+
+    public FloatingActionButton getFAB() {
+        return fab;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,8 +175,6 @@ public class MainActivity extends AppCompatActivity
         PACKAGE_NAME = getApplicationContext().getPackageName();
         context_final = this;
 
-        // dbManager = new F1_DBManager(context_final.getApplicationContext(), "Fridge.db", null, 1);
-
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -170,7 +184,30 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (f1) {
+                if (list_check) {
+                    if(login_check) {
+                        Lock lock = new ReentrantLock();
+                        lock.lock();
+                        try {
+                            delstate = 2;
+                            ChangeDelstate();
+                        } finally {
+                            lock.unlock();
+                        }
+                        F1_Fridge f1_fridge = new F1_Fridge();
+                        f1_fridge.LoadDBdata();
+                    }
+                    else{
+                        F1_DBManager dbmanager = new F1_DBManager(getApplicationContext(), "Fridge.db", null, 1);
+                        dbmanager.update("update FRIDGE set del = " + 2 + " where del = 1;");
+                    }
+                    fab.setBackgroundTintList(ColorStateList.valueOf(getGlobalApplicationContext().getResources().getColor(R.color.colorAccent)));
+                    fab.setImageDrawable(getGlobalApplicationContext().getResources().getDrawable(R.drawable.plus));
+                    fab.invalidate();
+                    checknum = 0;
+                    list_check = false;
+                }
+                else if (f1) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                     builder
                             .setMessage("추가")
@@ -256,6 +293,7 @@ public class MainActivity extends AppCompatActivity
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons();
 
+
 //spinner
         final Spinner alarmspinner;
         final Spinner alarmspinnermin;
@@ -267,24 +305,6 @@ public class MainActivity extends AppCompatActivity
 
         SwitchCompat switchCompat = (SwitchCompat) alarmitem.getActionView().findViewById(R.id.switchcompat);
         switchCompat.setOnCheckedChangeListener(this);
-//        sortspinner = (Spinner) menu1.findItem(R.id.nav_sort_spinner).getActionView();
-//        sortspinner.setAdapter(new ArrayAdapter<String>(
-//                this, android.R.layout.simple_spinner_dropdown_item, NavSortItem));
-//        sortspinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                String a = NavSortItem[0];
-//                if (!a.equals(sortspinner.getSelectedItem().toString())) {
-//                    Toast.makeText(MainActivity.this, NavSortItem[position], Toast.LENGTH_SHORT).show();
-//                    a = NavSortItem[position];
-//                }
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
         alarmspinner = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_hour).getActionView();
         alarmspinnermin = (Spinner) menu1.findItem(R.id.nav_alarm_spinner_min).getActionView();
         alarmspinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, NavAlarmHourItem));
@@ -323,24 +343,43 @@ public class MainActivity extends AppCompatActivity
             }
         });
         hideItem();
-        if(login_head.equals("")) {
-            checkhead();
+        //if(login_head.equals("")) {
+        Lock lock = new ReentrantLock();
+        lock.lock();
+        try {
+            if(login_head.equals(""))
+                checkhead();
         }
-
+        finally{
+            lock.unlock();
+        }
+        //}
         mCalendar = Calendar.getInstance();
         int hour, min;
-
         databaseReference.child("share").limitToLast(1).addChildEventListener(new ChildEventListener() {  // message는 child의 이벤트를 수신합니다.
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
                 FirebaseDB firemessage = dataSnapshot.getValue(FirebaseDB.class);  // chatData를 가져오고
                 final String TAG_SENDTIME = "sendtime";
+
                 try {
                     JSONObject c = new JSONObject(firemessage.getMessage());
                     long timecheck = System.currentTimeMillis() - c.getLong(TAG_SENDTIME);
-                    if ((perform-- == 1) && (timecheck < 3000)) {
+                    final long[] timer = {100000};
+                    System.out.println("============perform : " + perform + ", " + timecheck + ", " + timer);
+//                    if ((perform-- == 1) && (timecheck < timer[0])) {
+                    if (timecheck < timer[0]) {
                         getShare();
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        timer[0] = 100000;
+                                    }
+                                },
+                                200000
+                        );
                     }
 
                 } catch (JSONException e) {
@@ -366,14 +405,42 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+    @Override
+    protected void onStart(){
+        checkhead();
+        super.onStart();
+    }
 
     @Override
     protected void onStop() {
         SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
         SharedPreferences.Editor editor = term.edit();
+        if(list_check){
+            if(login_check) {
+                Lock lock = new ReentrantLock();
+                lock.lock();
+                try {
+                    delstate = 0;
+                    ChangeDelstate();
+                } finally {
+                    lock.unlock();
+                }
+            }
+            else{
+                F1_DBManager dbmanager = new F1_DBManager(getApplicationContext(), "Fridge.db", null, 1);
+                dbmanager.update("update FRIDGE set del = " + 0 + " where del = 1;");
+            }
+            fab.setBackgroundTintList(ColorStateList.valueOf(getGlobalApplicationContext().getResources().getColor(R.color.colorAccent)));
+            fab.setImageDrawable(getGlobalApplicationContext().getResources().getDrawable(R.drawable.plus));
+            fab.invalidate();
+            checknum = 0;
+            list_check = false;
+        }
         if (db1_check)
             editor.putBoolean("F1_db", true); //First라는 key값으로 infoFirst 데이터를 저장한다.
 
+        if (db2_check)
+            editor.putBoolean("F2_db", true);
         editor.putString("ID", login_id); //First라는 key값으로 infoFirst 데이터를 저장한다.
         editor.putBoolean("login_check", login_check);
         editor.putBoolean("login_auto", login_auto);
@@ -417,6 +484,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
+
         if (id == R.id.logout) {
             tokenDelete(login_id);
             while (!tokenout) {
@@ -431,9 +499,11 @@ public class MainActivity extends AppCompatActivity
             login_head = "";
             login_id = "";
             login_token = "";
+
             SharedPreferences term = getSharedPreferences("term", MODE_PRIVATE);
             SharedPreferences.Editor editor = term.edit();
             editor.putString("ID", ""); //First라는 key값으로 infoFirst 데이터를 저장한다.
+            editor.putString("ID_head", "");
             editor.putBoolean("login_check", false);
             editor.putBoolean("login_auto", false);
             editor.putString("Token", "");
@@ -663,7 +733,6 @@ public class MainActivity extends AppCompatActivity
         // Do the real work in an async task, because we need to use the network anyway
         new AsyncTask<Object, Void, String>() {
             private ProgressDialog mDlg;
-
             @Override
             protected void onPreExecute() {
                 mDlg = new ProgressDialog(MainActivity.this);
@@ -671,6 +740,12 @@ public class MainActivity extends AppCompatActivity
                 mDlg.setMessage("잠시만 기다려 주세요...");
                 mDlg.show();
 
+                Arrays.sort(ocrtemp, new java.util.Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        return o2.length() - o1.length();
+                    }
+                });
                 super.onPreExecute();
             }
             @Override
@@ -733,15 +808,19 @@ public class MainActivity extends AppCompatActivity
             }
 
             protected void onPostExecute(String result) {
+
                 mDlg.dismiss();
                 strcam.clear();
+                String foodlist = result;
                 for (int i = 0; i < ocrtemp.length; i++) {
-                    if (result.contains(ocrtemp[i])) {
+                    if (foodlist.contains(ocrtemp[i])) {
                         strcam.add(ocrtemp[i]);
+                        foodlist = foodlist.replaceAll(ocrtemp[i], "");
                         Log.i("YSTest2", ocrtemp[i]);
                     }
                 }
                 camdialog();
+
             }
         }.execute();
     }
@@ -798,15 +877,16 @@ public class MainActivity extends AppCompatActivity
                 break;
             }
         } else {
-            builder.append("nothing");
+            builder.append("no");
         }
+
 
         return builder.toString();
     }
 
     void initstr(String[] str) {
         for (int i = 0; i < str.length; i++)
-            str[i] = "nothing";
+            str[i] = "no";
     }
 
     /////////////////////sql code /////////////////////////
@@ -1009,6 +1089,7 @@ public class MainActivity extends AppCompatActivity
         class GetDataJSON extends AsyncTask<String, Void, String> {
             @Override
             protected String doInBackground(String... params) {
+                //String param = "&u_id=" + login_head;
                 String param = "&u_id=" + login_id;
                 try {
                     URL url = new URL("http://13.124.64.178/find_sharehead.php");
@@ -1052,12 +1133,72 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onPostExecute(String result) {
                 login_head = result;
+                //System.out.println("===========login_head : " + login_head);
             }
         }
         GetDataJSON g = new GetDataJSON();
         g.execute();
     }
+    ///////////////////////////del 최종확인/////////////////////////////////////////////////
+    void ChangeDelstate() {
+        class GetDataJSON extends AsyncTask<String, Void, String> {
+            @Override
+            protected String doInBackground(String... params) {
+                String param = "&u_id=" + login_head + "&u_state=" + delstate;
 
+                String FB_json = "{\"head\" : \"" + login_head
+                        + "\", \"send\" : \"" + login_id
+                        + "\", \"sendtime\" : \"" + String.valueOf(System.currentTimeMillis())
+                        + "\"}";
+                FirebaseDB firemessage = new FirebaseDB(login_id, FB_json);  // 유저 이름과 메세지로 chatData 만들기
+                databaseReference.child("delete").push().setValue(firemessage);  // 기본 database 하위 message라는 child에 chatData를 list로 만들기
+                try {
+                    URL url = new URL("http://13.124.64.178/change_delstate.php");
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                    conn.setRequestMethod("POST");
+                    conn.setDoInput(true);
+                    conn.connect();
+
+/* 안드로이드 -> 서버 파라메터값 전달 */
+                    OutputStream outs = conn.getOutputStream();
+                    outs.write(param.getBytes("UTF-8"));
+                    outs.flush();
+                    outs.close();
+
+/* 서버 -> 안드로이드 파라메터값 전달 */
+                    InputStream is = null;
+                    BufferedReader in = null;
+                    String data = "";
+
+                    is = conn.getInputStream();
+                    in = new BufferedReader(new InputStreamReader(is), 8 * 1024);
+
+                    String json;
+                    StringBuilder sb = new StringBuilder();
+                    while ((json = in.readLine()) != null) {
+                        sb.append(json + "\n");
+                    }
+
+                    return sb.toString().trim();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                    return null;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(String result){
+                System.out.println("=============delete complete : " + result + " ," + delstate);
+            }
+        }
+        GetDataJSON g = new GetDataJSON();
+        g.execute();
+    }
     public void camdialog() {
         final F1_CameraList dialog = new F1_CameraList(this);
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
@@ -1073,7 +1214,6 @@ public class MainActivity extends AppCompatActivity
 
         dialog.show();
     }
-
     public class mAlarm{
         private Context context;
         public mAlarm(Context context){

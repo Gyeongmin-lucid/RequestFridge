@@ -21,9 +21,6 @@ public class AlarmReceiver extends BroadcastReceiver{
                 .setNumber(1).setContentTitle("title").setContentText("test")
                 .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE).setContentIntent(pendingIntent).setAutoCancel(true);
 
-
-
-
-
+        notificationmanager.notify(1, builder.build());
     }
 }

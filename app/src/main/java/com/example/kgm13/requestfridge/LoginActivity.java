@@ -280,6 +280,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             protected void onPostExecute(String result) {
                 String myJSON = result;
+                System.out.println("=========================sign_in : " + myJSON);
                 showlogResult(myJSON);
             }
         }

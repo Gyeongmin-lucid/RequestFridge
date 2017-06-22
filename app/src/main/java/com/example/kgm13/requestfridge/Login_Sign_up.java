@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -73,11 +74,13 @@ public class Login_Sign_up extends AppCompatActivity {
                         finish();
                     }
                     else{
-                        Snackbar.make(view, "아이디를 확인해주세요", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                        Toast.makeText(getApplication(), "아이디를 확인해주세요", Toast.LENGTH_LONG).show();
+                        //Snackbar.make(view, "아이디를 확인해주세요", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                         signup = false;
                     }
                 } else {
-                    Snackbar.make(view, "비밀번호를 확인해주세요", Snackbar.LENGTH_LONG).setAction("Action", null).show();
+                    Toast.makeText(getApplication(), "비밀번호를 확인해주세요", Toast.LENGTH_LONG).show();
+                    //Snackbar.make(view, "비밀번호를 확인해주세요", Snackbar.LENGTH_LONG).setAction("Action", null).show();
                 }
             }
         });

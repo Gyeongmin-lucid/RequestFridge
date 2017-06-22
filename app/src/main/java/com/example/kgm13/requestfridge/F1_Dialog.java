@@ -99,8 +99,6 @@ public class F1_Dialog extends Dialog {
     @Nullable @Bind(R.id.f1_leftbtn) Button f1_leftbtn;
     @Nullable @Bind(R.id.f1_rightbtn) Button f1_rightbtn;
 
-    //getData에 대한 lock
-    Lock lock;
     public F1_Dialog(Context context) {
         super(context);
     }
@@ -155,6 +153,7 @@ public class F1_Dialog extends Dialog {
                     getData();
                     Snackbar.make(v, listname +"이(가) 추가되었습니다!", Snackbar.LENGTH_SHORT).setAction("Action", null).show();
                     db1_check = true;
+                    f1_listname.setText("");
                 }
             }
         });
@@ -315,7 +314,9 @@ public class F1_Dialog extends Dialog {
 
             url = c.getString(TAG_URL);
             location = c.getString(TAG_LOCATION);
-            dayleft = c.getInt(TAG_EXPIRE);
+            int temp_dayleft = c.getInt(TAG_EXPIRE);
+            if(dayleft == 0)
+                dayleft = temp_dayleft;
 
             Calendar date = Calendar.getInstance();
             date.add(Calendar.DATE, dayleft);
@@ -451,17 +452,5 @@ public class F1_Dialog extends Dialog {
         set_fridge g = new set_fridge(image);
         g.execute();
     }
-    public void getarraylist(ArrayList<String> arr){
-        int len = arr.size();
-        for(int i = 0 ; i < len ; i++){
-            lock.lock();
-            try {
-                listname = arr.get(i);
-                getData();
-            }
-            finally{
-                lock.unlock();
-            }
-        }
-    }
+
 }
